@@ -22,6 +22,7 @@ const { CLIENT_ID, CLIENT_SECRET, SYS_PWD, REDIRECT_URI } = process.env;
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
 let MELI_CODE = "";
+let MELI_TOKEN = "";
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -74,28 +75,27 @@ app.get("/meli2", async (req, res) => {
   }
 });
 
-app.get("/meli3", async (req, res) => {
-  const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${MELI_CODE}&redirect_uri=${REDIRECT_URI}`;
-  const customHeaders = {
-    "content-type": "application/x-www-form-urlencoded",
-    accept: "application/json",
-  };
-  const bla = await axios
-    .post(MELI_URL_TOKEN, dados, {
-      headers: customHeaders,
-    })
-    .then(({ data }) => {
-      // console.log(data);
-      const MELI_ACESS_TOKEN = data;
-      console.log("asdf", data, typeof data); //ERRROOOOOOOOOOOOOOOOOOOOOO
-      console.log("MELI_ACESS_TOKEN", MELI_ACESS_TOKEN);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-  // console.log("bla", bla);
-});
-
+// app.get("/meli3", async (req, res) => {
+//   const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${MELI_CODE}&redirect_uri=${REDIRECT_URI}`;
+//   const customHeaders = {
+//     "content-type": "application/x-www-form-urlencoded",
+//     accept: "application/json",
+//   };
+//   const bla = await axios
+//     .post(MELI_URL_TOKEN, dados, {
+//       headers: customHeaders,
+//     })
+//     .then(({ data }) => {
+//       // console.log(data);
+//       const MELI_ACESS_TOKEN = data;
+//       console.log("asdf", data, typeof data); //ERRROOOOOOOOOOOOOOOOOOOOOO
+//       console.log("MELI_ACESS_TOKEN", MELI_ACESS_TOKEN);
+//     })
+//     .catch((error) => {
+//       console.error(error);
+//     });
+//   // console.log("bla", bla);
+// });
 // const MELI_CODE = "TG-66b210dce6a43700019b7025-107585822";
 
 async function get_authorization_code() {
@@ -126,7 +126,9 @@ app.get("/meli4", async (req, res) => {
     await get_authorization_code()
       .then((result) => {
         console.log("renderiza resultado", result, "renderiza resultado acima");
-        res.render("home", { content: JSON.stringify(result.data) });
+        MELI_CODE = result.data.access_token;
+        // res.render("home", { content: JSON.stringify(result.data) });
+        res.render("home", { content: MELI_CODE });
       })
       .catch((error) => {
         console.log("renderiza erro");
