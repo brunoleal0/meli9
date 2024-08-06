@@ -21,6 +21,7 @@ const { CLIENT_ID, CLIENT_SECRET, SYS_PWD, REDIRECT_URI } = process.env;
 // const meli_redirect_url = "https://meli9-a72d777c8ad8.herokuapp.com/home";
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
+let MELI_CODE = "";
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -45,6 +46,7 @@ app.post("/login", (req, res) => {
 app.get("/home", (req, res) => {
   try {
     res.render("home", { content: JSON.stringify(req.query.code) });
+    MELI_CODE = JSON.stringify(req.query.code);
     // res.render("home", { content: "API Response." });
   } catch (err) {
     console.log("Algo deu errado =/", err);
@@ -65,11 +67,7 @@ app.get("/home", (req, res) => {
 
 app.get("/meli2", async (req, res) => {
   try {
-    // console.log(MELI_URL_CODE);
-    // res.redirect("https:www.google.com");
     res.redirect(MELI_URL_CODE);
-    const asdf = req.query.code;
-    console.log(req.query.code, asdf, asdf2);
   } catch (error) {
     res.render("home", { content: error });
     // res.status(404).send(error.message);
@@ -77,7 +75,7 @@ app.get("/meli2", async (req, res) => {
 });
 
 app.get("/meli3", async (req, res) => {
-  const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${CODE}&redirect_uri=${REDIRECT_URI}`;
+  const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${MELI_CODE}&redirect_uri=${REDIRECT_URI}`;
   const customHeaders = {
     "content-type": "application/x-www-form-urlencoded",
     accept: "application/json",
@@ -98,11 +96,11 @@ app.get("/meli3", async (req, res) => {
   // console.log("bla", bla);
 });
 
-const CODE = "TG-66b210dce6a43700019b7025-107585822";
+// const MELI_CODE = "TG-66b210dce6a43700019b7025-107585822";
 
 async function get_authorization_code() {
   console.log("rodando a budega");
-  const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${CODE}&redirect_uri=${REDIRECT_URI}`;
+  const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${MELI_CODE}&redirect_uri=${REDIRECT_URI}`;
   const customHeaders = {
     "content-type": "application/x-www-form-urlencoded",
     accept: "application/json",
