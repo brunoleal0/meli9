@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meli8</title>
+    <style>
+      .meli {
+        height: 200px;
+        width: 200px;
+        background-color: yellow;
+        margin-bottom: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Vai que dá certo!</h1>
+    <button class="meli" onclick="window.location.href='/meli1'">Meli 1</button>
+    <button class="meli" onclick="window.location.href='/meli2'">Meli 2</button>
+    <button class="meli" onclick="window.location.href='/meli3'">Meli 3</button>
+    <button class="meli" onclick="window.location.href='/meli4'">Meli 4</button>
+    <button class="meli" onclick="window.location.href='/test'">test</button>
+
+    <button type="submit" id="noAuth" onclick="window.location.href='/noAuth'">
+      No Auth
+    </button>
+    <button id="basicAuth" onclick="window.location.href='/basicAuth'">
+      Basic Auth
+    </button>
+    <button id="apiKey" onclick="window.location.href='/apiKey'">
+      API Key
+    </button>
+    <button id="bearerToken" onclick="window.location.href='/bearerToken'">
+      Bearer Token
+    </button>
+    <div class="response-area">
+      <p><%=content%></p>
+    </div>
+  </body>
+</html>
