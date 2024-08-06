@@ -5,23 +5,22 @@ const morgan = require("morgan");
 const path = require("path");
 const axios = require("axios");
 // const fetch = require("node-fetch");
+require("dotenv").config();
 
 const app = express();
-const port = 3000;
+// const port = 3000;
 const API_URL = "https://secrets-api.appbrewery.com";
-require("dotenv").config();
 const yourUsername = "hansel000";
 const yourPassword = "IAmTheBest";
 const yourAPIKey = "88dd1c8c-2438-4243-a772-19caf7c70673";
 const yourBearerToken = "40db8752-7f74-4de7-b10a-79275e542b7f";
+const { CLIENT_ID, CLIENT_SECRET, SYS_PWD, REDIRECT_URI } = process.env;
 
-const meli_id = "4576000651843598";
-const meli_secret_key = "3bIX0wSt8GELyV9rUnHpqkGaz2ScNZ41";
-const meli_redirect_url = "https://meli9-a72d777c8ad8.herokuapp.com/home";
-const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${meli_id}&redirect_uri=${meli_redirect_url}`;
+// const meli_id = "4576000651843598";
+// const meli_secret_key = "3bIX0wSt8GELyV9rUnHpqkGaz2ScNZ41";
+// const meli_redirect_url = "https://meli9-a72d777c8ad8.herokuapp.com/home";
+const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
-
-const { CLIENT_ID, CLIENT_SECRET, SYS_PWD } = process.env;
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -65,8 +64,12 @@ app.get("/home", (req, res) => {
 
 app.get("/meli2", async (req, res) => {
   try {
-    res.redirect(301, MELI_URL_CODE);
-    // console.log(req.query.code);g
+    // console.log(MELI_URL_CODE);
+    // res.redirect("https:www.google.com");
+    res.redirect(MELI_URL_CODE);
+    const asdf = req.query.code;
+    const asdf2 = await req.query.code;
+    console.log(req.query.code, asdf, asdf2);
   } catch (error) {
     res.render("home", { content: error });
     // res.status(404).send(error.message);
@@ -74,7 +77,7 @@ app.get("/meli2", async (req, res) => {
 });
 
 app.get("/meli3", async (req, res) => {
-  const dados = `grant_type=authorization_code&client_id=${meli_id}&client_secret=${meli_secret_key}&code=${CODE}&redirect_uri=${meli_redirect_url}`;
+  const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${CODE}&redirect_uri=${REDIRECT_URI}`;
   const customHeaders = {
     "content-type": "application/x-www-form-urlencoded",
     accept: "application/json",
@@ -99,7 +102,7 @@ const CODE = "TG-66b210dce6a43700019b7025-107585822";
 
 async function get_authorization_code() {
   console.log("rodando a budega");
-  const dados = `grant_type=authorization_code&client_id=${meli_id}&client_secret=${meli_secret_key}&code=${CODE}&redirect_uri=${meli_redirect_url}`;
+  const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${CODE}&redirect_uri=${REDIRECT_URI}`;
   const customHeaders = {
     "content-type": "application/x-www-form-urlencoded",
     accept: "application/json",
