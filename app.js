@@ -17,7 +17,7 @@ const yourBearerToken = "40db8752-7f74-4de7-b10a-79275e542b7f";
 
 const meli_id = "4576000651843598";
 const meli_secret_key = "3bIX0wSt8GELyV9rUnHpqkGaz2ScNZ41";
-const meli_redirect_url = "https://meli9-a72d777c8ad8.herokuapp.com/login";
+const meli_redirect_url = "https://meli9-a72d777c8ad8.herokuapp.com/home";
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${meli_id}&redirect_uri=${meli_redirect_url}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
 
