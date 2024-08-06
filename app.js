@@ -124,7 +124,7 @@ app.get("/pessoais", async (req, res) => {
       headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     console.log("asdfvcn result", result);
-    res.render("home", { content: JSON.stringify(result) });
+    res.render("home", { content: result });
   } catch (error) {
     res.render("home", { content: error });
   }
