@@ -66,7 +66,7 @@ app.get("/home", (req, res) => {
 //   }
 // });
 
-app.get("/meli2", async (req, res) => {
+app.get("/meli1", async (req, res) => {
   try {
     res.redirect(MELI_URL_CODE);
   } catch (error) {
@@ -74,29 +74,6 @@ app.get("/meli2", async (req, res) => {
     // res.status(404).send(error.message);
   }
 });
-
-// app.get("/meli3", async (req, res) => {
-//   const dados = `grant_type=authorization_code&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}&code=${MELI_CODE}&redirect_uri=${REDIRECT_URI}`;
-//   const customHeaders = {
-//     "content-type": "application/x-www-form-urlencoded",
-//     accept: "application/json",
-//   };
-//   const bla = await axios
-//     .post(MELI_URL_TOKEN, dados, {
-//       headers: customHeaders,
-//     })
-//     .then(({ data }) => {
-//       // console.log(data);
-//       const MELI_ACESS_TOKEN = data;
-//       console.log("asdf", data, typeof data); //ERRROOOOOOOOOOOOOOOOOOOOOO
-//       console.log("MELI_ACESS_TOKEN", MELI_ACESS_TOKEN);
-//     })
-//     .catch((error) => {
-//       console.error(error);
-//     });
-//   // console.log("bla", bla);
-// });
-// const MELI_CODE = "TG-66b210dce6a43700019b7025-107585822";
 
 async function get_authorization_code() {
   console.log("rodando a budega");
@@ -121,14 +98,14 @@ async function get_authorization_code() {
   });
 }
 
-app.get("/meli4", async (req, res) => {
+app.get("/meli2", async (req, res) => {
   try {
     await get_authorization_code()
       .then((result) => {
         console.log("renderiza resultado", result, "renderiza resultado acima");
-        MELI_CODE = result.data.access_token;
-        // res.render("home", { content: JSON.stringify(result.data) });
-        res.render("home", { content: MELI_CODE });
+        MELI_TOKEN = result.data.access_token;
+        res.render("home", { content: JSON.stringify(result.data) });
+        // res.render("home", { content: MELI_TOKEN });
       })
       .catch((error) => {
         console.log("renderiza erro");
@@ -136,6 +113,20 @@ app.get("/meli4", async (req, res) => {
       });
   } catch {
     console.log("kdsokfsdpfgs");
+  }
+});
+
+//fazer codigo pra gerar o refresh token
+
+app.get("/pessoais", async (req, res) => {
+  try {
+    const result = await axios.get("https://api.mercadolibre.com/users/me", {
+      headers: `Bearer ${MELI_TOKEN}`,
+    });
+    console.log("asdfvcn result", result);
+    res.render("home", { content: JSON.stringify(result) });
+  } catch (error) {
+    res.render("home", { content: error });
   }
 });
 
