@@ -46,7 +46,7 @@ app.post("/login", (req, res) => {
 app.get("/home", (req, res) => {
   try {
     res.render("home", { content: JSON.stringify(req.query.code) });
-    MELI_CODE = JSON.stringify(req.query.code);
+    MELI_CODE = req.query.code;
     // res.render("home", { content: "API Response." });
   } catch (err) {
     console.log("Algo deu errado =/", err);
