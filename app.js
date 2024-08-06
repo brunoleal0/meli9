@@ -17,8 +17,7 @@ const yourBearerToken = "40db8752-7f74-4de7-b10a-79275e542b7f";
 
 const meli_id = "4576000651843598";
 const meli_secret_key = "3bIX0wSt8GELyV9rUnHpqkGaz2ScNZ41";
-const meli_redirect_url = "https://www.google.com.br";
-// const MELI_URL = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${meli_id}&redirect_uri=meli_redirect_url&code_challenge=SEU_CODE_CHALLENGE&code_challenge_method=S256&state=SUA_STATE`;
+const meli_redirect_url = "https://meli9-a72d777c8ad8.herokuapp.com/login";
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${meli_id}&redirect_uri=${meli_redirect_url}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
 
@@ -53,21 +52,21 @@ app.get("/home", (req, res) => {
   }
 });
 
-app.get("/meli1", async (req, res) => {
-  try {
-    const result = await axios.get(MELI_URL_CODE);
-    res.render("home", { content: JSON.stringify(result.data) });
-    console.log(res);
-  } catch (error) {
-    res.render("home", { content: error });
-    // res.status(404).send(error.message);
-  }
-});
+// app.get("/meli1", async (req, res) => {
+//   try {
+//     const result = await axios.get(MELI_URL_CODE);
+//     res.render("home", { content: JSON.stringify(result.data) });
+//     console.log(res);
+//   } catch (error) {
+//     res.render("home", { content: error });
+//     // res.status(404).send(error.message);
+//   }
+// });
 
 app.get("/meli2", async (req, res) => {
   try {
-    res.redirect(301, MELI_URL);
-    // console.log(req.query.code);
+    res.redirect(301, MELI_URL_CODE);
+    // console.log(req.query.code);g
   } catch (error) {
     res.render("home", { content: error });
     // res.status(404).send(error.message);
