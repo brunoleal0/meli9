@@ -44,7 +44,8 @@ app.post("/login", (req, res) => {
 
 app.get("/home", (req, res) => {
   try {
-    res.render("home", { content: "API Response." });
+    res.render("home", { content: req });
+    // res.render("home", { content: "API Response." });
   } catch (err) {
     console.log("Algo deu errado =/", err);
     res.status(500).send(`Error! ${err}`);
@@ -68,7 +69,6 @@ app.get("/meli2", async (req, res) => {
     // res.redirect("https:www.google.com");
     res.redirect(MELI_URL_CODE);
     const asdf = req.query.code;
-    const asdf2 = await req.query.code;
     console.log(req.query.code, asdf, asdf2);
   } catch (error) {
     res.render("home", { content: error });
