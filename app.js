@@ -123,8 +123,8 @@ app.get("/pessoais", async (req, res) => {
     const result = await axios.get("https://api.mercadolibre.com/users/me", {
       headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
-    console.log("asdfvcn result", result);
-    res.render("home", { content: result });
+    console.log("asdfvcn result", result.data);
+    res.render("home", { content: result.data });
   } catch (error) {
     res.render("home", { content: error });
   }
