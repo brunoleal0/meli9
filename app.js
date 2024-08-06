@@ -121,7 +121,7 @@ app.get("/meli2", async (req, res) => {
 app.get("/pessoais", async (req, res) => {
   try {
     const result = await axios.get("https://api.mercadolibre.com/users/me", {
-      headers: `Bearer ${MELI_TOKEN}`,
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     console.log("asdfvcn result", result);
     res.render("home", { content: JSON.stringify(result) });
