@@ -44,7 +44,7 @@ app.post("/login", (req, res) => {
 
 app.get("/home", (req, res) => {
   try {
-    res.render("home", { content: JSON.stringify(req) });
+    res.render("home", { content: JSON.stringify(req.query.code) });
     // res.render("home", { content: "API Response." });
   } catch (err) {
     console.log("Algo deu errado =/", err);
