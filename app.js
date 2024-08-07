@@ -120,11 +120,7 @@ app.get("/gettoken", async (req, res) => {
       })
       .catch((error) => {
         console.log("renderiza erro");
-        res.render("home", {
-          content: error,
-          code: "",
-          token: "",
-        });
+        res.render("home", { content: error, code: "", token: "" });
       });
   } catch {
     console.log("kdsokfsdpfgs");
@@ -145,7 +141,7 @@ app.get("/pessoais", async (req, res) => {
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
+    res.render("home", { content: error, code: "", token: "" });
   }
 });
 
@@ -164,7 +160,7 @@ app.get("/mmpublico", async (req, res) => {
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
+    res.render("home", { content: error, code: "", token: "" });
   }
 });
 
@@ -185,7 +181,7 @@ app.post("/consultanome", async (req, res) => {
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
+    res.render("home", { content: error, code: "", token: "" });
   }
 });
 
@@ -206,7 +202,7 @@ app.post("/consultaid", async (req, res) => {
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
+    res.render("home", { content: error, code: "", token: "" });
   }
 });
 
