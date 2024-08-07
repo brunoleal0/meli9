@@ -155,7 +155,24 @@ app.post("/consultanome", async (req, res) => {
         headers: `Authorization: Bearer ${MELI_TOKEN}`,
       }
     );
-    console.log("FSDKPSDFKspFSKFPDKSFPSD", result.data, "result", result);
+    // console.log("FSDKPSDFKspFSKFPDKSFPSD", result.data, "result", result);
+    res.render("home", { content: JSON.stringify(result.data) });
+  } catch (error) {
+    res.render("home", { content: error });
+  }
+});
+
+app.post("/consultaid", async (req, res) => {
+  const { id_concorrente } = req.body;
+  console.log(id_concorrente);
+  try {
+    const result = await axios.get(
+      `https://api.mercadolibre.com/users/${id_concorrente}`,
+      {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      }
+    );
+    // console.log("PLAKSPDa", result.data, "result", result);
     res.render("home", { content: JSON.stringify(result.data) });
   } catch (error) {
     res.render("home", { content: error });
