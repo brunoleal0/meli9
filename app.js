@@ -74,7 +74,7 @@ app.get("/home", (req, res) => {
 //   }
 // });
 
-app.get("/meli1", async (req, res) => {
+app.get("/getcode", async (req, res) => {
   try {
     res.redirect(MELI_URL_CODE);
   } catch (error) {
@@ -106,7 +106,7 @@ async function get_authorization_code() {
   });
 }
 
-app.get("/meli2", async (req, res) => {
+app.get("/gettoken", async (req, res) => {
   try {
     await get_authorization_code()
       .then((result) => {
@@ -114,8 +114,8 @@ app.get("/meli2", async (req, res) => {
         MELI_TOKEN = result.data.access_token;
         res.render("home", {
           content: JSON.stringify(result.data),
-          code: JSON.stringify(result.data),
-          token: MELI_TOKEN,
+          code: MELI_CODE,
+          token: JSON.stringify(result.data),
         });
         // res.render("home", { content: MELI_TOKEN });
       })
