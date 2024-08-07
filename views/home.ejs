@@ -14,7 +14,10 @@
     </style>
   </head>
   <body>
-    <h1>Vai que dá certo!</h1>
+    <div class="code-token-area">
+      <h1>`Code: <%=code%>`</h1>
+      <h1>`Code: <%=token%>`</h1>
+    </div>
     <button class="meli" onclick="window.location.href='/meli1'">
       Gerar Code
     </button>
@@ -38,14 +41,13 @@
       />
       <button type="submit">Consultar Concorrente</button>
     </form>
-    <hr />
     <form action="/consultaid" method="POST">
       <label for="id_concorrente">ID concorrente:</label>
       <input
         type="id_concorrente"
         id="consultaid"
         name="id_concorrente"
-        placeholder="Insira o id de um perfil do Mercado Livre aqui"
+        placeholder="Insira o ID de um perfil do Mercado Livre aqui"
       />
       <button type="submit">Consultar Concorrente</button>
     </form>

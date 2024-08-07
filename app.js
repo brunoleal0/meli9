@@ -104,12 +104,20 @@ app.get("/meli2", async (req, res) => {
       .then((result) => {
         console.log("renderiza resultado", result, "renderiza resultado acima");
         MELI_TOKEN = result.data.access_token;
-        res.render("home", { content: JSON.stringify(result.data) });
+        res.render("home", {
+          content: JSON.stringify(result.data),
+          code: MELI_CODE,
+          token: MELI_TOKEN,
+        });
         // res.render("home", { content: MELI_TOKEN });
       })
       .catch((error) => {
         console.log("renderiza erro");
-        res.render("home", { content: error });
+        res.render("home", {
+          content: error,
+          code: MELI_CODE,
+          token: MELI_TOKEN,
+        });
       });
   } catch {
     console.log("kdsokfsdpfgs");
@@ -124,9 +132,13 @@ app.get("/pessoais", async (req, res) => {
       headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     console.log("asdfvcn result", result.data);
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", {
+      content: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
-    res.render("home", { content: error });
+    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
   }
 });
 
@@ -139,9 +151,13 @@ app.get("/mmpublico", async (req, res) => {
       }
     );
     console.log("fokgo result", result.data);
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", {
+      content: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
-    res.render("home", { content: error });
+    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
   }
 });
 
@@ -156,9 +172,13 @@ app.post("/consultanome", async (req, res) => {
       }
     );
     // console.log("FSDKPSDFKspFSKFPDKSFPSD", result.data, "result", result);
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", {
+      content: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
-    res.render("home", { content: error });
+    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
   }
 });
 
@@ -173,9 +193,13 @@ app.post("/consultaid", async (req, res) => {
       }
     );
     // console.log("PLAKSPDa", result.data, "result", result);
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", {
+      content: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
-    res.render("home", { content: error });
+    res.render("home", { content: error, code: MELI_CODE, token: MELI_TOKEN });
   }
 });
 
@@ -197,7 +221,11 @@ app.get("/basicAuth", async (req, res) => {
         password: yourPassword,
       },
     });
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", {
+      content: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
     res.status(404).send(error.message);
   }
@@ -211,7 +239,11 @@ app.get("/apiKey", async (req, res) => {
         apiKey: yourAPIKey,
       },
     });
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", {
+      content: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
     res.status(404).send(error.message);
   }
@@ -224,7 +256,11 @@ const config = {
 app.get("/bearerToken", async (req, res) => {
   try {
     const result = await axios.get(API_URL + "/secrets/2", config);
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", {
+      content: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
     res.status(404).send(error.message);
   }
