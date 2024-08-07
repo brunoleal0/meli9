@@ -52,7 +52,7 @@ app.get("/home", (req, res) => {
   try {
     res.render("home", {
       content: JSON.stringify(req.query.code),
-      code: JSON.stringify(req.query.code),
+      code: req.query.code,
       token: MELI_TOKEN,
     });
     MELI_CODE = req.query.code;
@@ -79,7 +79,6 @@ app.get("/getcode", async (req, res) => {
     res.redirect(MELI_URL_CODE);
   } catch (error) {
     res.render("home", { content: error });
-    // res.status(404).send(error.message);
   }
 });
 
