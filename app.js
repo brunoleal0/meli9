@@ -52,7 +52,7 @@ app.post("/login", (req, res) => {
 app.get("/home", (req, res) => {
   try {
     res.render("home", {
-      api_url: "",
+      url_api: "fgfdg",
       resultado_api: JSON.stringify(req.query.code),
       code: req.query.code,
       token: MELI_TOKEN,
@@ -115,7 +115,7 @@ app.get("/gettoken", async (req, res) => {
         console.log("renderiza resultado", result, "renderiza resultado acima");
         MELI_TOKEN = result.data.access_token;
         res.render("home", {
-          api_url: url,
+          url_api: url,
           resultado_api: JSON.stringify(result.data),
           code: MELI_CODE,
           token: MELI_TOKEN,
@@ -124,7 +124,12 @@ app.get("/gettoken", async (req, res) => {
       })
       .catch((error) => {
         console.log("renderiza erro");
-        res.render("home", { resultado_api: error, code: "", token: "" });
+        res.render("home", {
+          url_api: url,
+          resultado_api: error,
+          code: "",
+          token: "",
+        });
       });
   } catch {
     console.log("kdsokfsdpfgs");
@@ -141,14 +146,14 @@ app.get("/pessoais", async (req, res) => {
     });
     console.log("asdfvcn result", result.data);
     res.render("home", {
-      api_url: url,
+      url_api: url,
       resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
   } catch (error) {
     res.render("home", {
-      api_url: url,
+      url_api: url,
       resultado_api: error,
       code: "",
       token: "",
@@ -165,7 +170,7 @@ app.get("/mmpublico", async (req, res) => {
     });
     console.log("podflq result", result.data);
     res.render("home", {
-      api_url: url,
+      url_api: url,
       resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
@@ -190,14 +195,14 @@ app.post("/consultanome", async (req, res) => {
     });
     // console.log("FSDKPSDFKspFSKFPDKSFPSD", result.data, "result", result);
     res.render("home", {
-      api_url: url,
+      url_api: url,
       resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
   } catch (error) {
     res.render("home", {
-      api_url: url,
+      url_api: url,
       resultado_api: error,
       code: "",
       token: "",
@@ -215,14 +220,14 @@ app.post("/consultaid", async (req, res) => {
     });
     // console.log("PLAKSPDa", result.data, "result", result);
     res.render("home", {
-      api_url: url,
+      url_api: url,
       resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
   } catch (error) {
     res.render("home", {
-      api_url: url,
+      url_api: url,
       resultado_api: error,
       code: "",
       token: "",
