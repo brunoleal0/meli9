@@ -21,21 +21,22 @@
     <button class="meli" onclick="window.location.href='/meli2'">
       Gerar Token
     </button>
+    <button class="meli" onclick="window.location.href='/mmpublico'">
+      Mais Modelismo - Dados Públicos
+    </button>
     <button class="meli" onclick="window.location.href='/pessoais'">
       Informações Pessoais
     </button>
-    <button class="meli" onclick="window.location.href='/mmpublico'">
-      Informações Pessoais
-    </button>
     <hr />
-    <form action="/consultanome" method="GET">
-      <label for="dsdsafdsf">Nome concorrente:</label>
+    <form action="/consultanome" method="POST">
+      <label for="nome_concorrente">Nome concorrente:</label>
       <input
-        type="dsdsafdsf"
-        name="insira o nome do concorrente aqui"
+        type="nome_concorrente"
         id="consultanome"
+        name="nome_concorrente"
+        placeholder="Insira o nome de um perfil do Mercado Livre aqui"
       />
-      <button type="submit">Consulta Nome</button>
+      <button type="submit">Consultar Concorrente</button>
     </form>
     <hr />
     <button type="submit" id="noAuth" onclick="window.location.href='/noAuth'">

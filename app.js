@@ -145,16 +145,8 @@ app.get("/mmpublico", async (req, res) => {
   }
 });
 
-app.post("/login", (req, res) => {
-  if (req.body.password === SYS_PWD) {
-    // req.session.user = true;
-    res.render("home", { content: "API Response." });
-  } else {
-    res.redirect("/?error=senha-incorreta");
-  }
-});
-
-app.get("/consultanome", async (req, res) => {
+app.post("/consultanome", async (req, res) => {
+  const { nome_concorrente } = req.body;
   try {
     const result = axios.get(
       `https://api.mercadolibre.com/sites/MLB/search?${req.body.consultanome}`,
