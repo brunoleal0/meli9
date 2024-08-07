@@ -115,7 +115,7 @@ app.get("/gettoken", async (req, res) => {
         res.render("home", {
           content: JSON.stringify(result.data),
           code: MELI_CODE,
-          token: JSON.stringify(result.data),
+          token: MELI_TOKEN,
         });
         // res.render("home", { content: MELI_TOKEN });
       })
