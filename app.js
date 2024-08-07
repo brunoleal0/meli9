@@ -130,6 +130,45 @@ app.get("/pessoais", async (req, res) => {
   }
 });
 
+app.get("/mmpublico", async (req, res) => {
+  try {
+    const result = await axios.get(
+      "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo",
+      {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      }
+    );
+    console.log("fokgo result", result.data);
+    res.render("home", { content: JSON.stringify(result.data) });
+  } catch (error) {
+    res.render("home", { content: error });
+  }
+});
+
+app.post("/login", (req, res) => {
+  if (req.body.password === SYS_PWD) {
+    // req.session.user = true;
+    res.render("home", { content: "API Response." });
+  } else {
+    res.redirect("/?error=senha-incorreta");
+  }
+});
+
+app.get("/consultanome", async (req, res) => {
+  try {
+    const result = axios.get(
+      `https://api.mercadolibre.com/sites/MLB/search?${req.body.consultanome}`,
+      {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      }
+    );
+    console.log("FSDKPSDFKspFSKFPDKSFPSD");
+    res.render("home", { content: JSON.stringify(result.data) });
+  } catch (error) {
+    res.render("home", { content: error });
+  }
+});
+
 app.get("/noAuth", async (req, res) => {
   try {
     const result = await axios.get(API_URL + "/random");

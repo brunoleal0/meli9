@@ -24,7 +24,20 @@
     <button class="meli" onclick="window.location.href='/pessoais'">
       Informações Pessoais
     </button>
-
+    <button class="meli" onclick="window.location.href='/mmpublico'">
+      Informações Pessoais
+    </button>
+    <hr />
+    <form action="/consultanome" method="GET">
+      <label for="dsdsafdsf">Nome concorrente:</label>
+      <input
+        type="dsdsafdsf"
+        name="insira o nome do concorrente aqui"
+        id="consultanome"
+      />
+      <button type="submit">Consulta Nome</button>
+    </form>
+    <hr />
     <button type="submit" id="noAuth" onclick="window.location.href='/noAuth'">
       No Auth
     </button>
@@ -37,6 +50,7 @@
     <button id="bearerToken" onclick="window.location.href='/bearerToken'">
       Bearer Token
     </button>
+    <hr />
     <div class="response-area">
       <p><%=content%></p>
     </div>
