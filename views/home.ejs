@@ -14,8 +14,13 @@
   </head>
   <body>
     <div class="code-token-area">
+      <% if (locals.code) { %>
       <h1>Code: <%=code%></h1>
+      <% } %>
+      <p></p>
+      <% if (locals.token) { %>
       <h1>Token: <%=token%></h1>
+      <% } %>
     </div>
     <hr />
     <button class="meli" onclick="window.location.href='/getcode'">
@@ -65,13 +70,18 @@
       Bearer Token
     </button>
     <hr />
+    <% if (locals.url_api) { %>
     <div class="question-area">
       <h2>URL da API:</h2>
       <p><%=url_api%></p>
     </div>
+    <% } %>
+    <p></p>
+    <% if (locals.resultado_api) { %>
     <div class="response-area">
       <h2>Resultado da API:</h2>
       <p><%=resultado_api%></p>
     </div>
+    <% } %>
   </body>
 </html>
