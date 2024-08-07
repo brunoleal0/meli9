@@ -38,7 +38,11 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
   if (req.body.password === SYS_PWD) {
     // req.session.user = true;
-    res.render("home", { content: "API Response." });
+    res.render("home", {
+      content: "API Response.",
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } else {
     res.redirect("/?error=senha-incorreta");
   }
@@ -46,7 +50,11 @@ app.post("/login", (req, res) => {
 
 app.get("/home", (req, res) => {
   try {
-    res.render("home", { content: JSON.stringify(req.query.code) });
+    res.render("home", {
+      content: JSON.stringify(req.query.code),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
     MELI_CODE = req.query.code;
     // res.render("home", { content: "API Response." });
   } catch (err) {
