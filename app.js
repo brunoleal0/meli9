@@ -52,7 +52,7 @@ app.get("/home", (req, res) => {
   try {
     res.render("home", {
       content: JSON.stringify(req.query.code),
-      code: MELI_CODE,
+      code: JSON.stringify(req.query.code),
       token: MELI_TOKEN,
     });
     MELI_CODE = req.query.code;
@@ -114,7 +114,7 @@ app.get("/meli2", async (req, res) => {
         MELI_TOKEN = result.data.access_token;
         res.render("home", {
           content: JSON.stringify(result.data),
-          code: MELI_CODE,
+          code: JSON.stringify(result.data),
           token: MELI_TOKEN,
         });
         // res.render("home", { content: MELI_TOKEN });
@@ -123,8 +123,8 @@ app.get("/meli2", async (req, res) => {
         console.log("renderiza erro");
         res.render("home", {
           content: error,
-          code: MELI_CODE,
-          token: MELI_TOKEN,
+          code: "",
+          token: "",
         });
       });
   } catch {
