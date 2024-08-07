@@ -39,7 +39,8 @@ app.post("/login", (req, res) => {
   if (req.body.password === SYS_PWD) {
     // req.session.user = true;
     res.render("home", {
-      content: "API Response.",
+      url_api: "API URL.",
+      resultado_api: "API Response.",
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
@@ -51,12 +52,13 @@ app.post("/login", (req, res) => {
 app.get("/home", (req, res) => {
   try {
     res.render("home", {
-      content: JSON.stringify(req.query.code),
+      api_url: "",
+      resultado_api: JSON.stringify(req.query.code),
       code: req.query.code,
       token: MELI_TOKEN,
     });
     MELI_CODE = req.query.code;
-    // res.render("home", { content: "API Response." });
+    // res.render("home", { resultado_api: "API Response." });
   } catch (err) {
     console.log("Algo deu errado =/", err);
     res.status(500).send(`Error! ${err}`);
@@ -66,10 +68,10 @@ app.get("/home", (req, res) => {
 // app.get("/meli1", async (req, res) => {
 //   try {
 //     const result = await axios.get(MELI_URL_CODE);
-//     res.render("home", { content: JSON.stringify(result.data) });
+//     res.render("home", { resultado_api: JSON.stringify(result.data) });
 //     console.log(res);
 //   } catch (error) {
-//     res.render("home", { content: error });
+//     res.render("home", { resultado_api: error });
 //     // res.status(404).send(error.message);
 //   }
 // });
@@ -78,7 +80,7 @@ app.get("/getcode", async (req, res) => {
   try {
     res.redirect(MELI_URL_CODE);
   } catch (error) {
-    res.render("home", { content: error });
+    res.render("home", { resultado_api: error });
   }
 });
 
@@ -106,21 +108,23 @@ async function get_authorization_code() {
 }
 
 app.get("/gettoken", async (req, res) => {
+  const url = MELI_URL_TOKEN;
   try {
     await get_authorization_code()
       .then((result) => {
         console.log("renderiza resultado", result, "renderiza resultado acima");
         MELI_TOKEN = result.data.access_token;
         res.render("home", {
-          content: JSON.stringify(result.data),
+          api_url: url,
+          resultado_api: JSON.stringify(result.data),
           code: MELI_CODE,
           token: MELI_TOKEN,
         });
-        // res.render("home", { content: MELI_TOKEN });
+        // res.render("home", { resultado_api: MELI_TOKEN });
       })
       .catch((error) => {
         console.log("renderiza erro");
-        res.render("home", { content: error, code: "", token: "" });
+        res.render("home", { resultado_api: error, code: "", token: "" });
       });
   } catch {
     console.log("kdsokfsdpfgs");
@@ -130,79 +134,99 @@ app.get("/gettoken", async (req, res) => {
 //fazer codigo pra gerar o refresh token
 
 app.get("/pessoais", async (req, res) => {
+  const url = "https://api.mercadolibre.com/users/me";
   try {
-    const result = await axios.get("https://api.mercadolibre.com/users/me", {
+    const result = await axios.get(url, {
       headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     console.log("asdfvcn result", result.data);
     res.render("home", {
-      content: JSON.stringify(result.data),
+      api_url: url,
+      resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: "", token: "" });
+    res.render("home", {
+      api_url: url,
+      resultado_api: error,
+      code: "",
+      token: "",
+    });
   }
 });
 
 app.get("/mmpublico", async (req, res) => {
+  const url =
+    "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo";
   try {
-    const result = await axios.get(
-      "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo",
-      {
-        headers: `Authorization: Bearer ${MELI_TOKEN}`,
-      }
-    );
-    console.log("fokgo result", result.data);
+    const result = await axios.get(url, {
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
+    });
+    console.log("podflq result", result.data);
     res.render("home", {
-      content: JSON.stringify(result.data),
+      api_url: url,
+      resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: "", token: "" });
+    res.render("home", {
+      url_api: url,
+      resultado_api: error,
+      code: "",
+      token: "",
+    });
   }
 });
 
 app.post("/consultanome", async (req, res) => {
   const { nome_concorrente } = req.body;
+  const url = `https://api.mercadolibre.com/sites/MLB/search?nickname=${nome_concorrente}`;
   console.log(nome_concorrente);
   try {
-    const result = await axios.get(
-      `https://api.mercadolibre.com/sites/MLB/search?nickname=${nome_concorrente}`,
-      {
-        headers: `Authorization: Bearer ${MELI_TOKEN}`,
-      }
-    );
+    const result = await axios.get(url, {
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
+    });
     // console.log("FSDKPSDFKspFSKFPDKSFPSD", result.data, "result", result);
     res.render("home", {
-      content: JSON.stringify(result.data),
+      api_url: url,
+      resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: "", token: "" });
+    res.render("home", {
+      api_url: url,
+      resultado_api: error,
+      code: "",
+      token: "",
+    });
   }
 });
 
 app.post("/consultaid", async (req, res) => {
   const { id_concorrente } = req.body;
+  const url = `https://api.mercadolibre.com/users/${id_concorrente}`;
   console.log(id_concorrente);
   try {
-    const result = await axios.get(
-      `https://api.mercadolibre.com/users/${id_concorrente}`,
-      {
-        headers: `Authorization: Bearer ${MELI_TOKEN}`,
-      }
-    );
+    const result = await axios.get(url, {
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
+    });
     // console.log("PLAKSPDa", result.data, "result", result);
     res.render("home", {
-      content: JSON.stringify(result.data),
+      api_url: url,
+      resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
   } catch (error) {
-    res.render("home", { content: error, code: "", token: "" });
+    res.render("home", {
+      api_url: url,
+      resultado_api: error,
+      code: "",
+      token: "",
+    });
   }
 });
 
@@ -210,7 +234,7 @@ app.get("/noAuth", async (req, res) => {
   try {
     const result = await axios.get(API_URL + "/random");
     console.log(res);
-    res.render("home", { content: JSON.stringify(result.data) });
+    res.render("home", { resultado_api: JSON.stringify(result.data) });
   } catch (error) {
     res.status(404).send(error.message);
   }
@@ -225,7 +249,7 @@ app.get("/basicAuth", async (req, res) => {
       },
     });
     res.render("home", {
-      content: JSON.stringify(result.data),
+      resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
@@ -243,7 +267,7 @@ app.get("/apiKey", async (req, res) => {
       },
     });
     res.render("home", {
-      content: JSON.stringify(result.data),
+      resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
@@ -260,7 +284,7 @@ app.get("/bearerToken", async (req, res) => {
   try {
     const result = await axios.get(API_URL + "/secrets/2", config);
     res.render("home", {
-      content: JSON.stringify(result.data),
+      resultado_api: JSON.stringify(result.data),
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
