@@ -155,7 +155,7 @@ app.post("/consultanome", async (req, res) => {
         headers: `Authorization: Bearer ${MELI_TOKEN}`,
       }
     );
-    console.log("FSDKPSDFKspFSKFPDKSFPSD");
+    console.log("FSDKPSDFKspFSKFPDKSFPSD", result.data, "result", result);
     res.render("home", { content: JSON.stringify(result.data) });
   } catch (error) {
     res.render("home", { content: error });
