@@ -149,7 +149,7 @@ app.post("/consultanome", async (req, res) => {
   const { nome_concorrente } = req.body;
   console.log(nome_concorrente);
   try {
-    const result = axios.get(
+    const result = await axios.get(
       `https://api.mercadolibre.com/sites/MLB/search?${nome_concorrente}`,
       {
         headers: `Authorization: Bearer ${MELI_TOKEN}`,
