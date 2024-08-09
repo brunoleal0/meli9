@@ -6,9 +6,13 @@ const path = require("path");
 const axios = require("axios");
 // const fetch = require("node-fetch");
 require("dotenv").config();
+const session = require("express-session");
+const passport = require("passport");
+const { Strategy } = require("passport-local");
 
 const app = express();
-const { CLIENT_ID, CLIENT_SECRET, SYS_PWD, REDIRECT_URI } = process.env;
+const { CLIENT_ID, CLIENT_SECRET, SYS_PWD, REDIRECT_URI, COOKIE_SECRET } =
+  process.env;
 
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
@@ -22,44 +26,76 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(morgan("combined"));
 
+app.use(
+  session({
+    secret: COOKIE_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 12,
+    },
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.get("/", (req, res) => {
   res.render("index");
 });
 
-app.post("/login", (req, res) => {
-  if (req.body.password === SYS_PWD) {
-    // req.session.user = true;
-    res.render("home", {
-      url_api: "API URL.",
-      resultado_api: "API Response.",
-      code: MELI_CODE,
-      token: MELI_TOKEN,
-    });
-  } else {
-    res.redirect("/?error=senha-incorreta");
-  }
-});
+// app.post("/login", (req, res) => {
+//   if (req.body.password === SYS_PWD) {
+//     // req.session.user = true;
+//     res.render("home", {
+//       url_api: "API URL.",
+//       resultado_api: "API Response.",
+//       code: MELI_CODE,
+//       token: MELI_TOKEN,
+//     });
+//   } else {
+//     res.redirect("/?error=senha-incorreta");
+//   }
+// });
+
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    successRedirect: "/home",
+    failureRedirect: "/",
+  })
+);
 
 app.get("/home", (req, res) => {
-  try {
-    res.render("home", {
-      url_api: `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=$APP_ID&redirect_uri=$YOUR_URL`,
-      resultado_api: JSON.stringify(req.query.code),
-      code: req.query.code,
-      token: MELI_TOKEN,
-    });
-    MELI_CODE = req.query.code;
-    // res.render("home", { resultado_api: "API Response." });
-  } catch (err) {
-    res.status(500).send(`Error! ${err}`);
+  console.log(req.isAuthenticated);
+  console.log(req.user);
+  if (req.isAuthenticated()) {
+    try {
+      res.render("home", {
+        url_api: `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=$APP_ID&redirect_uri=$YOUR_URL`,
+        resultado_api: JSON.stringify(req.query.code),
+        code: req.query.code,
+        token: MELI_TOKEN,
+      });
+      MELI_CODE = req.query.code;
+      // res.render("home", { resultado_api: "API Response." });
+    } catch (err) {
+      res.status(500).send(`Error! ${err}`);
+    }
+  } else {
+    res.redirect("/");
   }
 });
 
 app.get("/getcode", async (req, res) => {
-  try {
-    res.redirect(MELI_URL_CODE);
-  } catch (error) {
-    res.render("home", { resultado_api: error });
+  console.log(req.isAuthenticated);
+  if (req.isAuthenticated()) {
+    try {
+      res.redirect(MELI_URL_CODE);
+    } catch (error) {
+      res.render("home", { resultado_api: error });
+    }
+  } else {
+    res.redirect("/");
   }
 });
 
@@ -84,122 +120,172 @@ async function get_authorization_code() {
 }
 
 app.get("/gettoken", async (req, res) => {
-  const url = MELI_URL_TOKEN;
-  try {
-    await get_authorization_code()
-      .then((result) => {
-        MELI_TOKEN = result.data.access_token;
-        res.render("home", {
-          url_api: url,
-          resultado_api: JSON.stringify(result.data),
-          code: MELI_CODE,
-          token: MELI_TOKEN,
+  console.log(req.isAuthenticated);
+  if (req.isAuthenticated()) {
+    const url = MELI_URL_TOKEN;
+    try {
+      await get_authorization_code()
+        .then((result) => {
+          MELI_TOKEN = result.data.access_token;
+          res.render("home", {
+            url_api: url,
+            resultado_api: JSON.stringify(result.data),
+            code: MELI_CODE,
+            token: MELI_TOKEN,
+          });
+        })
+        .catch((error) => {
+          res.render("home", {
+            url_api: url,
+            resultado_api: error,
+            code: "",
+            token: "",
+          });
         });
-      })
-      .catch((error) => {
-        res.render("home", {
-          url_api: url,
-          resultado_api: error,
-          code: "",
-          token: "",
-        });
-      });
-  } catch (error) {
-    console.log("FSDkosdgkjoa", error);
+    } catch (error) {
+      console.log("FSDkosdgkjoa", error);
+    }
+  } else {
+    res.redirect("/");
   }
 });
 
-//fazer codigo pra gerar o refresh token
-
 app.get("/pessoais", async (req, res) => {
-  const url = "https://api.mercadolibre.com/users/me";
-  try {
-    const result = await axios.get(url, {
-      headers: `Authorization: Bearer ${MELI_TOKEN}`,
-    });
-    res.render("home", {
-      url_api: url,
-      resultado_api: JSON.stringify(result.data),
-      code: MELI_CODE,
-      token: MELI_TOKEN,
-    });
-  } catch (error) {
-    res.render("home", {
-      url_api: url,
-      resultado_api: error,
-      code: "",
-      token: "",
-    });
+  console.log(req.isAuthenticated);
+  if (req.isAuthenticated()) {
+    const url = "https://api.mercadolibre.com/users/me";
+    try {
+      const result = await axios.get(url, {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      });
+      res.render("home", {
+        url_api: url,
+        resultado_api: JSON.stringify(result.data),
+        code: MELI_CODE,
+        token: MELI_TOKEN,
+      });
+    } catch (error) {
+      res.render("home", {
+        url_api: url,
+        resultado_api: error,
+        code: "",
+        token: "",
+      });
+    }
+  } else {
+    res.redirect("/");
   }
 });
 
 app.get("/mmpublico", async (req, res) => {
-  const url =
-    "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo";
-  try {
-    const result = await axios.get(url, {
-      headers: `Authorization: Bearer ${MELI_TOKEN}`,
-    });
-    res.render("home", {
-      url_api: url,
-      resultado_api: JSON.stringify(result.data),
-      code: MELI_CODE,
-      token: MELI_TOKEN,
-    });
-  } catch (error) {
-    res.render("home", {
-      url_api: url,
-      resultado_api: error,
-      code: "",
-      token: "",
-    });
+  console.log(req.isAuthenticated);
+  if (req.isAuthenticated()) {
+    const url =
+      "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo";
+    try {
+      const result = await axios.get(url, {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      });
+      res.render("home", {
+        url_api: url,
+        resultado_api: JSON.stringify(result.data),
+        code: MELI_CODE,
+        token: MELI_TOKEN,
+      });
+    } catch (error) {
+      res.render("home", {
+        url_api: url,
+        resultado_api: error,
+        code: "",
+        token: "",
+      });
+    }
+  } else {
+    res.redirect("/");
   }
 });
 
 app.post("/consultanome", async (req, res) => {
-  const { nome } = req.body;
-  const url = `https://api.mercadolibre.com/sites/MLB/search?nickname=${nome}`;
-  try {
-    const result = await axios.get(url, {
-      headers: `Authorization: Bearer ${MELI_TOKEN}`,
-    });
-    res.render("home", {
-      url_api: url,
-      resultado_api: JSON.stringify(result.data),
-      code: MELI_CODE,
-      token: MELI_TOKEN,
-    });
-  } catch (error) {
-    res.render("home", {
-      url_api: url,
-      resultado_api: error,
-      code: "",
-      token: "",
-    });
+  console.log(req.isAuthenticated);
+  if (req.isAuthenticated()) {
+    const { nome } = req.body;
+    const url = `https://api.mercadolibre.com/sites/MLB/search?nickname=${nome}`;
+    try {
+      const result = await axios.get(url, {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      });
+      res.render("home", {
+        url_api: url,
+        resultado_api: JSON.stringify(result.data),
+        code: MELI_CODE,
+        token: MELI_TOKEN,
+      });
+    } catch (error) {
+      res.render("home", {
+        url_api: url,
+        resultado_api: error,
+        code: "",
+        token: "",
+      });
+    }
+  } else {
+    res.redirect("/");
   }
 });
 
 app.post("/consultaid", async (req, res) => {
-  const { id } = req.body;
-  const url = `https://api.mercadolibre.com/users/${id}`;
-  try {
-    const result = await axios.get(url, {
-      headers: `Authorization: Bearer ${MELI_TOKEN}`,
-    });
-    res.render("home", {
-      url_api: url,
-      resultado_api: JSON.stringify(result.data),
-      code: MELI_CODE,
-      token: MELI_TOKEN,
-    });
-  } catch (error) {
-    res.render("home", {
-      url_api: url,
-      resultado_api: error,
-      code: "",
-      token: "",
-    });
+  console.log(req.isAuthenticated);
+  if (req.isAuthenticated()) {
+    const { id } = req.body;
+    const url = `https://api.mercadolibre.com/users/${id}`;
+    try {
+      const result = await axios.get(url, {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      });
+      res.render("home", {
+        url_api: url,
+        resultado_api: JSON.stringify(result.data),
+        code: MELI_CODE,
+        token: MELI_TOKEN,
+      });
+    } catch (error) {
+      res.render("home", {
+        url_api: url,
+        resultado_api: error,
+        code: "",
+        token: "",
+      });
+    }
+  } else {
+    res.redirect("/");
   }
+});
+
+// This function NEEDS to have both username and password as FILLED INPUTS in INDEX.EJS
+passport.use(
+  new Strategy(async function verify(username, password, callback) {
+    try {
+      console.log(password);
+      if (password === SYS_PWD) {
+        console.log("senha correta");
+        const user = "Camilinda";
+        return callback(null, user);
+      } else {
+        console.log("senha errada");
+        return callback(null, false);
+      }
+    } catch (error) {
+      console.log("dasdas", error);
+    }
+  })
+);
+
+passport.serializeUser((user, callback) => {
+  callback(null, user);
+});
+
+passport.deserializeUser((user, callback) => {
+  callback(null, user);
 });
 
 module.exports = app;

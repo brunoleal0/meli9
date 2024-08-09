@@ -9,9 +9,11 @@
   <body>
     <h1>Bem vindo!</h1>
     <form action="/login" method="POST">
+      <label for="username">Login:</label>
+      <input type="username" name="username" id="username" required autofocus />
       <label for="password">Senha:</label>
-      <input type="password" name="password" id="password" />
-      <button type="submit">Let's begin!</button>
+      <input type="password" name="password" id="password" required autofocus />
+      <button type="submit">Entrar</button>
     </form>
   </body>
 </html>
