@@ -66,7 +66,7 @@ app.post(
 );
 
 app.get("/home", (req, res) => {
-  console.log(req.isAuthenticated);
+  //console.log(req.isAuthenticated());
   console.log(req.user);
   if (req.isAuthenticated()) {
     try {
@@ -87,7 +87,7 @@ app.get("/home", (req, res) => {
 });
 
 app.get("/getcode", async (req, res) => {
-  console.log(req.isAuthenticated);
+  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     try {
       res.redirect(MELI_URL_CODE);
@@ -120,7 +120,7 @@ async function get_authorization_code() {
 }
 
 app.get("/gettoken", async (req, res) => {
-  console.log(req.isAuthenticated);
+  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const url = MELI_URL_TOKEN;
     try {
@@ -151,7 +151,7 @@ app.get("/gettoken", async (req, res) => {
 });
 
 app.get("/pessoais", async (req, res) => {
-  console.log(req.isAuthenticated);
+  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const url = "https://api.mercadolibre.com/users/me";
     try {
@@ -178,7 +178,7 @@ app.get("/pessoais", async (req, res) => {
 });
 
 app.get("/mmpublico", async (req, res) => {
-  console.log(req.isAuthenticated);
+  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const url =
       "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo";
@@ -206,7 +206,7 @@ app.get("/mmpublico", async (req, res) => {
 });
 
 app.post("/consultanome", async (req, res) => {
-  console.log(req.isAuthenticated);
+  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const { nome } = req.body;
     const url = `https://api.mercadolibre.com/sites/MLB/search?nickname=${nome}`;
@@ -234,7 +234,7 @@ app.post("/consultanome", async (req, res) => {
 });
 
 app.post("/consultaid", async (req, res) => {
-  console.log(req.isAuthenticated);
+  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const { id } = req.body;
     const url = `https://api.mercadolibre.com/users/${id}`;
