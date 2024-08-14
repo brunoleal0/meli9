@@ -214,7 +214,7 @@ app.post("/pedidos", async (req, res) => {
     try {
       const result = await axios.get(url, {
         params: {
-          offset: offset,
+          offset: "0",
           limit: "51",
         },
         headers: `Authorization: Bearer ${fake_meli_token}`,
@@ -327,6 +327,7 @@ app.get("/teste", async (req, res) => {
     });
     console.log(`deu certo ${JSON.stringify(result.data)}`);
     for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
+      //nao pega de 1000 pra cima
       console.log(`Loop ${i}`);
       const result_x = await axios.get(url, {
         params: {
