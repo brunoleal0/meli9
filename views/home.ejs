@@ -35,6 +35,12 @@
     <button class="meli" onclick="window.location.href='/pessoais'">
       Informações Pessoais
     </button>
+    <button class="meli" onclick="window.location.href='/pedidos'">
+      Lista de Produtos
+    </button>
+    <button class="meli" onclick="window.location.href='/lista_de_produtos'">
+      Lista de Produtos
+    </button>
     <hr />
     <form action="/consultanome" method="POST">
       <label for="nome">Nome concorrente:</label>
@@ -57,6 +63,11 @@
       <button type="submit">Consultar Concorrente</button>
     </form>
     <hr />
+    <form action="/pedidos" method="POST">
+      <label for="id">Offset:</label>
+      <input type="offset" id="offsetasdf" name="offset" placeholder="0" />
+      <button type="submit">Consultar Pedidos</button>
+    </form>
     <% if (locals.url_api) { %>
     <div class="question-area">
       <h2>URL da API:</h2>

@@ -150,6 +150,34 @@ app.get("/gettoken", async (req, res) => {
   }
 });
 
+app.get("/mmpublico", async (req, res) => {
+  //console.log(req.isAuthenticated());
+  if (req.isAuthenticated()) {
+    const url =
+      "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo";
+    try {
+      const result = await axios.get(url, {
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      });
+      res.render("home", {
+        url_api: url,
+        resultado_api: JSON.stringify(result.data),
+        code: MELI_CODE,
+        token: MELI_TOKEN,
+      });
+    } catch (error) {
+      res.render("home", {
+        url_api: url,
+        resultado_api: error,
+        code: "",
+        token: "",
+      });
+    }
+  } else {
+    res.redirect("/");
+  }
+});
+
 app.get("/pessoais", async (req, res) => {
   //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
@@ -177,14 +205,19 @@ app.get("/pessoais", async (req, res) => {
   }
 });
 
-app.get("/mmpublico", async (req, res) => {
-  //console.log(req.isAuthenticated());
+app.post("/pedidos", async (req, res) => {
   if (req.isAuthenticated()) {
-    const url =
-      "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo";
+    const { offset } = req.body;
+    const url = "https://api.mercadolibre.com/orders/search";
+    const fake_meli_token =
+      "APP_USR-4576000651843598-081413-5acd90eefae966abc687207fe9f8e3ca-1375484326";
     try {
       const result = await axios.get(url, {
-        headers: `Authorization: Bearer ${MELI_TOKEN}`,
+        params: {
+          offset: offset,
+          limit: "51",
+        },
+        headers: `Authorization: Bearer ${fake_meli_token}`,
       });
       res.render("home", {
         url_api: url,
@@ -258,6 +291,73 @@ app.post("/consultaid", async (req, res) => {
     }
   } else {
     res.redirect("/");
+  }
+});
+
+app.get("/lista_de_produtos", async (req, res) => {
+  if (req.isAuthenticated()) {
+    const id = "107585822";
+    const url = `https://api.mercadolibre.com/users/${id}/items/search`;
+    try {
+      ("DKOSAKDaODKA");
+    } catch (error) {
+      res.render("home", {
+        url_api: url,
+        resultado_api: error,
+        code: "",
+        token: "",
+      });
+    }
+  } else {
+    res.redirect("/");
+  }
+});
+
+app.get("/teste", async (req, res) => {
+  // const id = "107585822"; //Pessoal
+  const id = "1375484326"; //MM
+  const url = `https://api.mercadolibre.com/users/${id}/items/search`;
+  const fake_meli_token =
+    "APP_USR-4576000651843598-081413-5acd90eefae966abc687207fe9f8e3ca-1375484326";
+  var scroll_id_x = [""];
+  var product_ids = [];
+  try {
+    const result = await axios.get(url, {
+      headers: `Authorization: Bearer ${fake_meli_token}`,
+    });
+    console.log(`deu certo ${JSON.stringify(result.data)}`);
+    for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
+      console.log(`Loop ${i}`);
+      const result_x = await axios.get(url, {
+        params: {
+          search_type: "scan",
+          offset: "0",
+          limit: "100",
+          scroll_id: scroll_id_x[i],
+        },
+        headers: `Authorization: Bearer ${fake_meli_token}`,
+      });
+      console.log(i);
+      console.log(`scroll id${i}: ${result_x.data.scroll_id}`);
+      scroll_id_x.push(result_x.data.scroll_id);
+      product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
+    }
+    console.log(scroll_id_x);
+    console.log(product_ids);
+    res.send(result.data);
+  } catch (error) {
+    console.log(`deu errado: ${error}`);
+    res.send(error);
+  }
+});
+
+app.get("/teste2", async (req, res) => {
+  try {
+    const url = "";
+    console.log(`teste2 deu certo`);
+  } catch (error) {
+    console.log(`teste2 deu errado: ${error}`);
+    res.send(error);
   }
 });
 
