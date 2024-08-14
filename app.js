@@ -219,6 +219,7 @@ app.post("/pedidos", async (req, res) => {
         },
         headers: `Authorization: Bearer ${fake_meli_token}`,
       });
+      console.log(result);
       res.render("home", {
         url_api: url,
         resultado_api: JSON.stringify(result.data),
