@@ -206,7 +206,7 @@ app.post("/pedidos", async (req, res) => {
     console.log("tentei");
     const result = await axios.get(url, {
       params: {
-        offset: "0",
+        offset: offset,
         limit: "51",
       },
       headers: `Authorization: Bearer ${fake_meli_token}`,
