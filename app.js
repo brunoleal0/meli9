@@ -198,7 +198,7 @@ app.get("/pessoais", async (req, res) => {
 });
 
 app.post("/pedidos", async (req, res) => {
-  // const { offset } = req.body;
+  const { offset } = req.body;
   const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
   const fake_meli_token =
     "APP_USR-4576000651843598-081413-5acd90eefae966abc687207fe9f8e3ca-1375484326";
