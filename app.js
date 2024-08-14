@@ -11,8 +11,14 @@ const passport = require("passport");
 const { Strategy } = require("passport-local");
 
 const app = express();
-const { CLIENT_ID, CLIENT_SECRET, SYS_PWD, REDIRECT_URI, COOKIE_SECRET } =
-  process.env;
+const {
+  CLIENT_ID,
+  CLIENT_SECRET,
+  SYS_PWD,
+  REDIRECT_URI,
+  COOKIE_SECRET,
+  SELLER_ID,
+} = process.env;
 
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
@@ -42,20 +48,6 @@ app.use(passport.session());
 app.get("/", (req, res) => {
   res.render("index");
 });
-
-// app.post("/login", (req, res) => {
-//   if (req.body.password === SYS_PWD) {
-//     // req.session.user = true;
-//     res.render("home", {
-//       url_api: "API URL.",
-//       resultado_api: "API Response.",
-//       code: MELI_CODE,
-//       token: MELI_TOKEN,
-//     });
-//   } else {
-//     res.redirect("/?error=senha-incorreta");
-//   }
-// });
 
 app.post(
   "/login",
@@ -206,36 +198,32 @@ app.get("/pessoais", async (req, res) => {
 });
 
 app.post("/pedidos", async (req, res) => {
-  if (req.isAuthenticated()) {
-    const { offset } = req.body;
-    const url = "https://api.mercadolibre.com/orders/search";
-    const fake_meli_token =
-      "APP_USR-4576000651843598-081413-5acd90eefae966abc687207fe9f8e3ca-1375484326";
-    try {
-      const result = await axios.get(url, {
-        params: {
-          offset: "0",
-          limit: "51",
-        },
-        headers: `Authorization: Bearer ${fake_meli_token}`,
-      });
-      console.log(result);
-      res.render("home", {
-        url_api: url,
-        resultado_api: JSON.stringify(result.data),
-        code: MELI_CODE,
-        token: MELI_TOKEN,
-      });
-    } catch (error) {
-      res.render("home", {
-        url_api: url,
-        resultado_api: error,
-        code: "",
-        token: "",
-      });
-    }
-  } else {
-    res.redirect("/");
+  // const { offset } = req.body;
+  const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
+  const fake_meli_token =
+    "APP_USR-4576000651843598-081413-5acd90eefae966abc687207fe9f8e3ca-1375484326";
+  try {
+    console.log("tentei");
+    const result = await axios.get(url, {
+      params: {
+        offset: "0",
+        limit: "51",
+      },
+      headers: `Authorization: Bearer ${fake_meli_token}`,
+    });
+    res.render("home", {
+      url_api: url,
+      resultado_api: JSON.stringify(result.data),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
+  } catch (error) {
+    res.render("home", {
+      url_api: url,
+      resultado_api: error,
+      code: "",
+      token: "",
+    });
   }
 });
 
@@ -349,16 +337,6 @@ app.get("/teste", async (req, res) => {
     res.send(result.data);
   } catch (error) {
     console.log(`deu errado: ${error}`);
-    res.send(error);
-  }
-});
-
-app.get("/teste2", async (req, res) => {
-  try {
-    const url = "";
-    console.log(`teste2 deu certo`);
-  } catch (error) {
-    console.log(`teste2 deu errado: ${error}`);
     res.send(error);
   }
 });
