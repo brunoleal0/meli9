@@ -208,6 +208,7 @@ app.post("/pedidos", async (req, res) => {
       params: {
         offset: offset,
         limit: "51",
+        sort: "date_desc",
       },
       headers: `Authorization: Bearer ${fake_meli_token}`,
     });
