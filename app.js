@@ -201,7 +201,7 @@ app.post("/pedidos", async (req, res) => {
   const { offset } = req.body;
   const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
   const fake_meli_token =
-    "APP_USR-4576000651843598-081413-5acd90eefae966abc687207fe9f8e3ca-1375484326";
+    "APP_USR-4576000651843598-081510-e7db9d97cd06d09fe3096fb2649196a2-1375484326";
   try {
     console.log("tentei");
     const result = await axios.get(url, {
@@ -308,7 +308,7 @@ app.get("/teste", async (req, res) => {
   const id = "1375484326"; //MM
   const url = `https://api.mercadolibre.com/users/${id}/items/search`;
   const fake_meli_token =
-    "APP_USR-4576000651843598-081413-5acd90eefae966abc687207fe9f8e3ca-1375484326";
+    "APP_USR-4576000651843598-081510-e7db9d97cd06d09fe3096fb2649196a2-1375484326";
   var scroll_id_x = [""];
   var product_ids = [];
   try {
@@ -317,25 +317,22 @@ app.get("/teste", async (req, res) => {
     });
     console.log(`deu certo ${JSON.stringify(result.data)}`);
     for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
-      //nao pega de 1000 pra cima
       console.log(`Loop ${i}`);
       const result_x = await axios.get(url, {
         params: {
           search_type: "scan",
-          offset: "0",
           limit: "100",
-          scroll_id: scroll_id_x[i],
+          scroll_id: scroll_id_x[i], //na prática é como se puxasse de i-1 pq scroll_id_x[0] ja eh iniciado com o valor "" antes da primeira iteracao
         },
         headers: `Authorization: Bearer ${fake_meli_token}`,
       });
-      console.log(i);
-      console.log(`scroll id${i}: ${result_x.data.scroll_id}`);
+      console.log(result_x.data.results);
       scroll_id_x.push(result_x.data.scroll_id);
       product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
     }
     console.log(scroll_id_x);
     console.log(product_ids);
-    res.send(result.data);
+    res.send(product_ids);
   } catch (error) {
     console.log(`deu errado: ${error}`);
     res.send(error);
