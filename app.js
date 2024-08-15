@@ -171,7 +171,6 @@ app.get("/mmpublico", async (req, res) => {
 });
 
 app.get("/pessoais", async (req, res) => {
-  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const url = "https://api.mercadolibre.com/users/me";
     try {
@@ -231,6 +230,9 @@ app.post("/vendas", async (req, res) => {
 app.post("/consultauser", async (req, res) => {
   if (req.isAuthenticated()) {
     const { user } = req.body;
+    if (user === "") {
+      user = "me";
+    }
     if (!Number.isNaN(Number(user))) {
       url = `https://api.mercadolibre.com/users/${user}`;
     } else {
