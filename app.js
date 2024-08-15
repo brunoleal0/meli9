@@ -229,7 +229,8 @@ app.post("/vendas", async (req, res) => {
 
 app.post("/consultauser", async (req, res) => {
   if (req.isAuthenticated()) {
-    const { user } = req.body;
+    var { user } = req.body;
+    console.log(user);
     if (user === "") {
       user = "me";
     }
