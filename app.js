@@ -22,8 +22,8 @@ const {
 
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
-let MELI_CODE = " ";
-let MELI_TOKEN = " ";
+let MELI_CODE = "";
+let MELI_TOKEN = "";
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -197,7 +197,7 @@ app.get("/pessoais", async (req, res) => {
   }
 });
 
-app.post("/pedidos", async (req, res) => {
+app.post("/vendas", async (req, res) => {
   const { offset } = req.body;
   const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
   const fake_meli_token =

@@ -45,7 +45,7 @@
         type="user"
         id="consultauser"
         name="user"
-        placeholder="670550295"
+        placeholder="670550295 ou 107585822"
       />
       <button type="submit">Consultar Usuário</button>
     </form>
@@ -55,15 +55,15 @@
         type="seller"
         id="consultaseller"
         name="seller"
-        placeholder="670550295"
+        placeholder="670550295 ou 107585822"
       />
       <button type="submit">Consultar Vendedor</button>
     </form>
     <hr />
-    <form action="/pedidos" method="POST">
-      <label for="id">Offset:</label>
+    <form action="/vendas" method="POST">
+      <label for="offset">Offset:</label>
       <input type="offset" id="offsetasdf" name="offset" placeholder="0" />
-      <button type="submit">Consultar Pedidos</button>
+      <button type="submit">Consultar Vendas</button>
     </form>
     <% if (locals.url_api) { %>
     <div class="question-area">
