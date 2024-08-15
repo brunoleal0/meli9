@@ -1,10 +1,7 @@
-// import express from "express";
 const express = require("express");
-// import morgan from "morgan";
 const morgan = require("morgan");
 const path = require("path");
 const axios = require("axios");
-// const fetch = require("node-fetch");
 require("dotenv").config();
 const session = require("express-session");
 const passport = require("passport");
@@ -58,7 +55,6 @@ app.post(
 );
 
 app.get("/home", (req, res) => {
-  //console.log(req.isAuthenticated());
   console.log(req.user);
   if (req.isAuthenticated()) {
     try {
@@ -69,7 +65,6 @@ app.get("/home", (req, res) => {
         token: MELI_TOKEN,
       });
       MELI_CODE = req.query.code;
-      // res.render("home", { resultado_api: "API Response." });
     } catch (err) {
       res.status(500).send(`Error! ${err}`);
     }
@@ -79,7 +74,6 @@ app.get("/home", (req, res) => {
 });
 
 app.get("/getcode", async (req, res) => {
-  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     try {
       res.redirect(MELI_URL_CODE);
@@ -112,7 +106,6 @@ async function get_authorization_code() {
 }
 
 app.get("/gettoken", async (req, res) => {
-  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const url = MELI_URL_TOKEN;
     try {
@@ -143,7 +136,6 @@ app.get("/gettoken", async (req, res) => {
 });
 
 app.get("/mmpublico", async (req, res) => {
-  //console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     const url =
       "https://api.mercadolibre.com/sites/MLB/search?nickname=mais+modelismo";
