@@ -281,26 +281,7 @@ app.post("/consultaseller", async (req, res) => {
   }
 });
 
-app.get("/lista_de_produtos", async (req, res) => {
-  if (req.isAuthenticated()) {
-    const id = "107585822";
-    const url = `https://api.mercadolibre.com/users/${id}/items/search`;
-    try {
-      ("DKOSAKDaODKA");
-    } catch (error) {
-      res.render("home", {
-        url_api: url,
-        resultado_api: error,
-        code: "",
-        token: "",
-      });
-    }
-  } else {
-    res.redirect("/");
-  }
-});
-
-app.get("/teste", async (req, res) => {
+app.get("/geratabela", async (req, res) => {
   // const id = "107585822"; //Pessoal
   const id = "1375484326"; //MM
   const url = `https://api.mercadolibre.com/users/${id}/items/search`;
