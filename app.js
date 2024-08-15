@@ -6,8 +6,7 @@ require("dotenv").config();
 const session = require("express-session");
 const passport = require("passport");
 const { Strategy } = require("passport-local");
-
-const app = express();
+const { Pool, Client } = require("pg");
 const {
   CLIENT_ID,
   CLIENT_SECRET,
@@ -15,20 +14,33 @@ const {
   REDIRECT_URI,
   COOKIE_SECRET,
   SELLER_ID,
+  DB_USERNAME,
+  DB_HOST,
+  DB_DATABASE,
+  DB_PASSWORD,
+  DB_PORT,
 } = process.env;
-
 const MELI_URL_CODE = `https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
 const MELI_URL_TOKEN = `https://api.mercadolibre.com/oauth/token`;
 let MELI_CODE = "";
 let MELI_TOKEN = "";
+const pool = new Pool({
+  user: DB_USERNAME,
+  host: DB_HOST,
+  database: DB_DATABASE,
+  password: DB_PASSWORD,
+  port: DB_PORT,
+  ssl: {
+    require: true,
+    rejectUnauthorized: false,
+  },
+});
+const app = express();
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
-
 app.use(express.urlencoded({ extended: false }));
-
 app.use(morgan("combined"));
-
 app.use(
   session({
     secret: COOKIE_SECRET,
@@ -192,7 +204,7 @@ app.post("/vendas", async (req, res) => {
   const { offset } = req.body;
   const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
   const fake_meli_token =
-    "APP_USR-4576000651843598-081510-e7db9d97cd06d09fe3096fb2649196a2-1375484326";
+    "APP_USR-4576000651843598-081517-d74667341f1c6e19694b959b0adf9ee4-1375484326";
   try {
     console.log("tentei");
     const result = await axios.get(url, {
@@ -273,19 +285,42 @@ app.post("/consultaseller", async (req, res) => {
   }
 });
 
+// https://node-postgres.com/guides/project-structure
+const minha_query = async (text, params, callback) => {
+  const start = Date.now();
+  try {
+    const resposta = await pool.query(text, params, callback); //pool.query handla fechar a conexao do cliente
+    const end = Date.now();
+    const duration = end - start;
+    console.log(`sucess query ${duration / 1000}s`);
+    return resposta;
+  } catch (error) {
+    const end = Date.now();
+    const duration = end - start;
+    console.log(`error query ${duration / 1000}s`);
+    return error;
+  }
+};
+
+app.get("/databasepoolstructure", async (req, res) => {
+  const resposta = await minha_query("SELECT * from public.teste");
+  console.log(resposta);
+  res.send(resposta);
+});
+
 app.get("/geratabela", async (req, res) => {
   // const id = "107585822"; //Pessoal
   const id = "1375484326"; //MM
   const url = `https://api.mercadolibre.com/users/${id}/items/search`;
   const fake_meli_token =
-    "APP_USR-4576000651843598-081510-e7db9d97cd06d09fe3096fb2649196a2-1375484326";
+    "APP_USR-4576000651843598-081517-d74667341f1c6e19694b959b0adf9ee4-1375484326";
   var scroll_id_x = [""];
   var product_ids = [];
   try {
     const result = await axios.get(url, {
       headers: `Authorization: Bearer ${fake_meli_token}`,
     });
-    console.log(`deu certo ${JSON.stringify(result.data)}`);
+    // console.log(`deu certo ${JSON.stringify(result.data)}`);
     for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
       console.log(`Loop ${i}`);
       const result_x = await axios.get(url, {
@@ -300,11 +335,11 @@ app.get("/geratabela", async (req, res) => {
       scroll_id_x.push(result_x.data.scroll_id);
       product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
     }
-    console.log(scroll_id_x);
-    console.log(product_ids);
+    // console.log(scroll_id_x);
+    // console.log(product_ids);
     res.send(product_ids);
   } catch (error) {
-    console.log(`deu errado: ${error}`);
+    // console.log(`deu errado: ${error}`);
     res.send(error);
   }
 });
