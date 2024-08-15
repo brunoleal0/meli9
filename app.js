@@ -230,7 +230,7 @@ app.post("/vendas", async (req, res) => {
 app.post("/consultauser", async (req, res) => {
   if (req.isAuthenticated()) {
     const { user } = req.body;
-    console.log("usuario: ", user);
+    console.log("usuario: ", user, typeof user);
     if (!Number.isNaN(Number(user))) {
       url = `https://api.mercadolibre.com/users/${user}`;
     } else if (user === "") {
