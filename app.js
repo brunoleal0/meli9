@@ -228,15 +228,16 @@ app.post("/pedidos", async (req, res) => {
   }
 });
 
-app.post("/consultanome", async (req, res) => {
-  //console.log(req.isAuthenticated());
+app.post("/consultauser", async (req, res) => {
   if (req.isAuthenticated()) {
-    const { nome } = req.body;
-    const url = `https://api.mercadolibre.com/sites/MLB/search?nickname=${nome}`;
+    const { user } = req.body;
+    if (!Number.isNaN(Number(user))) {
+      url = `https://api.mercadolibre.com/users/${user}`;
+    } else {
+      url = `https://api.mercadolibre.com/sites/MLB/search?nickname=${user}`;
+    }
     try {
-      const result = await axios.get(url, {
-        headers: `Authorization: Bearer ${MELI_TOKEN}`,
-      });
+      const result = await axios.get(url);
       res.render("home", {
         url_api: url,
         resultado_api: JSON.stringify(result.data),
@@ -256,15 +257,12 @@ app.post("/consultanome", async (req, res) => {
   }
 });
 
-app.post("/consultaid", async (req, res) => {
-  //console.log(req.isAuthenticated());
+app.post("/consultaseller", async (req, res) => {
   if (req.isAuthenticated()) {
-    const { id } = req.body;
-    const url = `https://api.mercadolibre.com/users/${id}`;
+    const { seller } = req.body;
+    url = `https://api.mercadolibre.com/sites/MLB/search?seller_id=${seller}`;
     try {
-      const result = await axios.get(url, {
-        headers: `Authorization: Bearer ${MELI_TOKEN}`,
-      });
+      const result = await axios.get(url);
       res.render("home", {
         url_api: url,
         resultado_api: JSON.stringify(result.data),
