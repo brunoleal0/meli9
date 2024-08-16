@@ -200,11 +200,75 @@ app.get("/pessoais", async (req, res) => {
   }
 });
 
+async function atributos() {
+  //nao precisa rodar todos os 1100 toda vez, da pra estabelecer uma data/numero e rodar so a partir dela/dele
+  const url = `https://api.mercadolibre.com/items?`;
+  const fake_meli_token =
+    "APP_USR-4576000651843598-081520-3fe3b7efe6c55ff67bf85a5cb1456992-1375484326";
+  const ids_bla = ["MLB4407660484,MLB4457260804"]; //aceita no max 20 itens
+  const result = await axios.get(url, {
+    params: {
+      ids: ids_bla.toString(),
+      attributes:
+        "id,title,price,permalink,catalog_product_id,attributes.id,attributes.name,attributes.value_name",
+      include_attributes: "all",
+    },
+    headers: `Authorization: Bearer ${fake_meli_token}`,
+  });
+  //https://stackoverflow.com/questions/49413544/destructuring-array-of-objects-in-es6
+  // https://stackoverflow.com/questions/66330228/how-to-destructure-an-array-of-objects-into-multiple-arrays-of-its-keys
+  // https://www.udemy.com/course/the-complete-javascript-course/learn/lecture/22648731#overview
+  // console.log(Object.values(result.data));
+  console.log(JSON.stringify(result.data));
+  const { ids, titulos, catalog_product_ids, prices, permalinks, GTINS, SKUS } =
+    {
+      ids: result.data.map((lixo) => lixo.body.id),
+      titulos: result.data.map((lixo) => lixo.body.title),
+      catalog_product_ids: result.data.map(
+        (lixo) => lixo.body.catalog_product_id
+      ),
+      prices: result.data.map((lixo) => lixo.body.price),
+      permalinks: result.data.map((lixo) => lixo.body.permalink),
+      GTINS: result.data.map(function (lixo) {
+        for (i in lixo.body.attributes) {
+          if (lixo.body.attributes[i].id == "GTIN") {
+            console.log(i);
+            return lixo.body.attributes[i].value_name;
+          } else {
+            console.log("GTIN", i);
+          }
+        }
+        return "-999999999";
+      }),
+      SKUS: result.data.map(function (lixo) {
+        for (i in lixo.body.attributes) {
+          if (lixo.body.attributes[i].id == "SELLER_SKU") {
+            console.log(i);
+            return lixo.body.attributes[i].value_name;
+          } else {
+            console.log("SKU", i);
+          }
+        }
+        return "DEURUIM";
+      }),
+    };
+  console.log(
+    ids,
+    titulos,
+    catalog_product_ids,
+    prices,
+    permalinks,
+    GTINS,
+    SKUS
+  );
+}
+atributos();
+
 app.post("/vendas", async (req, res) => {
   const { offset } = req.body;
   const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
   const fake_meli_token =
-    "APP_USR-4576000651843598-081517-d74667341f1c6e19694b959b0adf9ee4-1375484326";
+    "APP_USR-4576000651843598-081520-3fe3b7efe6c55ff67bf85a5cb1456992-1375484326";
   try {
     console.log("tentei");
     const result = await axios.get(url, {
@@ -313,7 +377,7 @@ app.get("/geratabela", async (req, res) => {
   const id = "1375484326"; //MM
   const url = `https://api.mercadolibre.com/users/${id}/items/search`;
   const fake_meli_token =
-    "APP_USR-4576000651843598-081517-d74667341f1c6e19694b959b0adf9ee4-1375484326";
+    "APP_USR-4576000651843598-081520-3fe3b7efe6c55ff67bf85a5cb1456992-1375484326";
   var scroll_id_x = [""];
   var product_ids = [];
   try {
