@@ -1,3 +1,6 @@
+const fake_meli_token =
+  "APP_USR-4576000651843598-081608-964312c231e53da22479c8fe1808afca-1375484326";
+
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
@@ -200,12 +203,10 @@ app.get("/pessoais", async (req, res) => {
   }
 });
 
-async function atributos() {
+async function atributos(ids_bla) {
   //nao precisa rodar todos os 1100 toda vez, da pra estabelecer uma data/numero e rodar so a partir dela/dele
   const url = `https://api.mercadolibre.com/items?`;
-  const fake_meli_token =
-    "APP_USR-4576000651843598-081520-3fe3b7efe6c55ff67bf85a5cb1456992-1375484326";
-  const ids_bla = ["MLB4407660484,MLB4457260804"]; //aceita no max 20 itens
+  // const ids_bla = ["MLB4407660484,MLB4457260804"]; //aceita no max 20 itens
   const result = await axios.get(url, {
     params: {
       ids: ids_bla.toString(),
@@ -238,7 +239,7 @@ async function atributos() {
             console.log("GTIN", i);
           }
         }
-        return "-999999999";
+        return "999999999";
       }),
       SKUS: result.data.map(function (lixo) {
         for (i in lixo.body.attributes) {
@@ -261,14 +262,13 @@ async function atributos() {
     GTINS,
     SKUS
   );
+  return { ids, titulos, catalog_product_ids, prices, permalinks, GTINS, SKUS };
 }
-atributos();
+// const asdf = atributos(["MLB4407660484,MLB4457260804"]); //so da pra dar AWAIT dentro de modules .:. asdf retorna undefined
 
 app.post("/vendas", async (req, res) => {
   const { offset } = req.body;
   const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
-  const fake_meli_token =
-    "APP_USR-4576000651843598-081520-3fe3b7efe6c55ff67bf85a5cb1456992-1375484326";
   try {
     console.log("tentei");
     const result = await axios.get(url, {
@@ -372,12 +372,20 @@ app.get("/databasepoolstructure", async (req, res) => {
   res.send(resposta);
 });
 
-app.get("/geratabela", async (req, res) => {
+// function InserePGSQL(template, data) {
+//   if (!(this instanceof Inserts)) {
+//     return new Inserts(template, data);
+//   }
+//   this.rawType = true;
+//   this.toPostgres = function () {
+//     return data.map((d) => "(" + pgp.as.format(template, d) + ")").join(",");
+//   };
+// }
+
+app.get("/atualizatabela", async (req, res) => {
   // const id = "107585822"; //Pessoal
   const id = "1375484326"; //MM
   const url = `https://api.mercadolibre.com/users/${id}/items/search`;
-  const fake_meli_token =
-    "APP_USR-4576000651843598-081520-3fe3b7efe6c55ff67bf85a5cb1456992-1375484326";
   var scroll_id_x = [""];
   var product_ids = [];
   try {
@@ -401,13 +409,60 @@ app.get("/geratabela", async (req, res) => {
     }
     // console.log(scroll_id_x);
     // console.log(product_ids);
-    res.send(product_ids);
+    product_ids.sort().reverse();
+    const lixo = await atributos(product_ids.slice(0, 20)); //tem que escolher o slice certo automaticamente <- a API so da 20 resultados
+    console.log("********************************************", lixo);
+    var vaidarcerto = await lixo.ids.map((id, i) => ({
+      id,
+      titulo: lixo.titulos[i],
+      catalog_product_id: lixo.catalog_product_ids[i],
+      price: ~~(lixo.prices[i] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
+      permalink: lixo.permalinks[i],
+      GTIN: lixo.GTINS[i],
+      SKU: lixo.SKUS[i],
+    }));
+    // const resposta = await minha_query(
+    //   `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,skus) VALUES $1 RETURNING *`,
+    //   InserePGSQL(
+    //     "${id}",
+    //     "${titulo}",
+    //     "${catalog_product_id}",
+    //     "${price}",
+    //     "${permalink}",
+    //     "${GTIN}",
+    //     "${SKU}",
+    //     vaidarcerto
+    //   )
+    // ); //escrevendo no postgres https://stackoverflow.com/questions/34990186/how-do-i-properly-insert-multiple-rows-into-pg-with-node-postgres
+    // console.log(resposta);
+    // res.send(resposta);
+    res.send(vaidarcerto);
+    res.render("home", {
+      url_api: url,
+      resultado_api: JSON.stringify(vaidarcerto),
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
-    // console.log(`deu errado: ${error}`);
-    res.send(error);
+    console.log(error);
+    res.render("home", {
+      url_api: url,
+      resultado_api: error,
+      code: "",
+      token: "",
+    });
   }
 });
 
+const lista0 = ["id0", "id1", "id2", "id3"];
+const lista1 = ["titlo0", "titulo1", "titulo2", "titulo3"];
+// console.log([...lista0, ...lista1]);
+
+var ojkdkfosd = lista0.map((id, i) => ({
+  id,
+  titulo: lista1[i],
+}));
+console.log(ojkdkfosd);
 // This function NEEDS to have both username and password as FILLED INPUTS in INDEX.EJS
 passport.use(
   new Strategy(async function verify(username, password, callback) {
