@@ -1,5 +1,5 @@
 const fake_meli_token =
-  "APP_USR-4576000651843598-081911-cb45e14d9be80c55574ff0041d56db78-1375484326";
+  "APP_USR-4576000651843598-081917-aa530283ef6402e832feb1a5d014439e-1375484326";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -209,7 +209,7 @@ async function atributos(ids_bla) {
     params: {
       ids: ids_bla.toString(),
       attributes:
-        "id,title,price,permalink,catalog_product_id,attributes.id,attributes.name,attributes.value_name",
+        "id,title,price,permalink,catalog_product_id,attributes.id,attributes.name,attributes.value_name,available_quantity,sold_quantity",
       include_attributes: "all",
       // include_internal_attributes: true,
     },
@@ -229,6 +229,10 @@ async function atributos(ids_bla) {
       ),
       prices: result.data.map((lixo) => lixo.body.price),
       permalinks: result.data.map((lixo) => lixo.body.permalink),
+      available_quantitity: result.data.map(
+        (lixo) => lixo.body.available_quantitity
+      ),
+      sold_quantity: result.data.map((lixo) => lixo.body.sold_quantity),
       GTINS: result.data.map(function (lixo) {
         for (i in lixo.body.attributes) {
           if (lixo.body.attributes[i].id == "GTIN") {
@@ -258,10 +262,22 @@ async function atributos(ids_bla) {
   //   catalog_product_ids,
   //   prices,
   //   permalinks,
+  // available_quantitity,
+  // sold_quantity,
   //   GTINS,
   //   SKUS
   // );
-  return { ids, titulos, catalog_product_ids, prices, permalinks, GTINS, SKUS };
+  return {
+    ids,
+    titulos,
+    catalog_product_ids,
+    prices,
+    permalinks,
+    available_quantitity,
+    sold_quantity,
+    GTINS,
+    SKUS,
+  };
 }
 
 app.post("/vendas", async (req, res) => {
@@ -400,6 +416,8 @@ app.get("/anuncios20", async (req, res) => {
       catalog_product_id: lixo.catalog_product_ids[i],
       price: ~~(lixo.prices[i] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
       permalink: lixo.permalinks[i],
+      available_quantitity: ~~lixo.available_quantitity[i],
+      sold_quantity: ~~lixo.sold_quantity[i],
       gtin: lixo.GTINS[i],
       sku: lixo.SKUS[i],
     }));
@@ -415,8 +433,8 @@ app.get("/anuncios20", async (req, res) => {
     console.log(`Deleção ${deletar}`);
     const inserir = await minha_query({
       texto:
-        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,sku)` +
-        "SELECT id,titulo,catalog_product_id,price,permalink,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
+        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantitity,sold_quantity,gtin,sku)` +
+        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantitity,sold_quantity,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
       params: [JSON.stringify(lixo_lista_jsons)],
       nome: "inserir",
     });
@@ -480,12 +498,14 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       // console.log("********************************************", lixo);
       var lixo_lista_jsons = await lixo.ids.map((id, x) => ({
         id,
-        titulo: lixo.titulos[x],
-        catalog_product_id: lixo.catalog_product_ids[x],
-        price: ~~(lixo.prices[x] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
-        permalink: lixo.permalinks[x],
-        gtin: lixo.GTINS[x],
-        sku: lixo.SKUS[x],
+        titulo: lixo.titulos[i],
+        catalog_product_id: lixo.catalog_product_ids[i],
+        price: ~~(lixo.prices[i] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
+        permalink: lixo.permalinks[i],
+        available_quantitity: ~~lixo.available_quantitity[i],
+        sold_quantity: ~~lixo.sold_quantity[i],
+        gtin: lixo.GTINS[i],
+        sku: lixo.SKUS[i],
       }));
       // console.log("********************************************", lixo_lista_jsons);
       lixo_lista_jsons_agregado.push(...lixo_lista_jsons);
@@ -515,6 +535,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
               catalog_product_id VARCHAR(100),
               price INT,
               permalink VARCHAR(200),
+              available_quantity INT,
+              sold_quantity INT,
               gtin VARCHAR(100),
               sku VARCHAR(100),
               data_atualizacao TIMESTAMP(0) DEFAULT (CURRENT_TIMESTAMP(0)-interval '3 hour')
@@ -526,8 +548,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
     // Insere
     const inserir = await minha_query({
       texto:
-        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,sku)` +
-        "SELECT id,titulo,catalog_product_id,price,permalink,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
+        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantitity,sold_quantity,gtin,sku)` +
+        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantitity,sold_quantity,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
       params: [JSON.stringify(lixo_lista_jsons_agregado)],
       nome: "inserir",
     });
