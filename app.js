@@ -204,15 +204,14 @@ app.get("/pessoais", async (req, res) => {
 });
 
 async function atributos(ids_bla) {
-  //nao precisa rodar todos os 1100 toda vez, da pra estabelecer uma data/numero e rodar so a partir dela/dele
   const url = `https://api.mercadolibre.com/items?`;
-  // const ids_bla = ["MLB4407660484,MLB4457260804"]; //aceita no max 20 itens
   const result = await axios.get(url, {
     params: {
       ids: ids_bla.toString(),
       attributes:
         "id,title,price,permalink,catalog_product_id,attributes.id,attributes.name,attributes.value_name",
       include_attributes: "all",
+      // include_internal_attributes: true,
     },
     headers: `Authorization: Bearer ${fake_meli_token}`,
   });
@@ -253,15 +252,15 @@ async function atributos(ids_bla) {
         return "ERRO";
       }),
     };
-  console.log(
-    ids,
-    titulos,
-    catalog_product_ids,
-    prices,
-    permalinks,
-    GTINS,
-    SKUS
-  );
+  // console.log(
+  //   ids,
+  //   titulos,
+  //   catalog_product_ids,
+  //   prices,
+  //   permalinks,
+  //   GTINS,
+  //   SKUS
+  // );
   return { ids, titulos, catalog_product_ids, prices, permalinks, GTINS, SKUS };
 }
 
@@ -395,7 +394,7 @@ app.get("/anuncios20", async (req, res) => {
     product_ids_reversed = product_ids.sort().toReversed();
     const lixo = await atributos(product_ids_reversed.slice(0, 20)); //ultimos 20
     // console.log("********************************************", lixo);
-    var lixo_json = await lixo.ids.map((id, i) => ({
+    var lixo_lista_jsons = await lixo.ids.map((id, i) => ({
       id,
       titulo: lixo.titulos[i],
       catalog_product_id: lixo.catalog_product_ids[i],
@@ -404,7 +403,10 @@ app.get("/anuncios20", async (req, res) => {
       gtin: lixo.GTINS[i],
       sku: lixo.SKUS[i],
     }));
-    // console.log("********************************************", lixo_json);
+    // console.log(
+    //   "********************************************",
+    //   lixo_lista_jsons
+    // );
     const deletar = await minha_query({
       texto: "DELETE FROM public.anuncios WHERE id = ANY ($1)",
       params: [lixo.ids],
@@ -415,7 +417,7 @@ app.get("/anuncios20", async (req, res) => {
       texto:
         `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,sku)` +
         "SELECT id,titulo,catalog_product_id,price,permalink,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
-      params: [JSON.stringify(lixo_json)],
+      params: [JSON.stringify(lixo_lista_jsons)],
       nome: "inserir",
     });
     console.log(`Inserção ${inserir}`);
@@ -426,13 +428,13 @@ app.get("/anuncios20", async (req, res) => {
     }:${(agora.getUTCMinutes() < 10 ? "0" : "") + agora.getUTCMinutes()}:${
       (agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()
     }`;
-    res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
-    // res.render("home", {
-    //   url_api: url,
-    //   resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
-    //   code: MELI_CODE,
-    //   token: MELI_TOKEN,
-    // });
+    // res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
+    res.render("home", {
+      url_api: url,
+      resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
   } catch (error) {
     console.log(error);
     res.render("home", {
@@ -448,11 +450,11 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
   const url = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
   var scroll_id_x = [""];
   var product_ids = [];
+  let lixo_lista_jsons_agregado = [];
   try {
     const result = await axios.get(url, {
       headers: `Authorization: Bearer ${fake_meli_token}`,
     });
-    // console.log(`deu certo ${JSON.stringify(result.data)}`);
     for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
       console.log(`Loop ${i}`);
       const result_x = await axios.get(url, {
@@ -463,57 +465,86 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
         },
         headers: `Authorization: Bearer ${fake_meli_token}`,
       });
-      console.log(result_x.data.results);
       scroll_id_x.push(result_x.data.scroll_id);
       product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
     }
-    // console.log(scroll_id_x);
-    // console.log(product_ids);
-    product_ids.sort().reverse();
-    const lixo = await atributos(product_ids.slice(0, 20)); //tem que escolher o slice certo automaticamente <- a API so da 20 resultados
-    console.log("********************************************", lixo);
-    var lixo_json = await lixo.ids.map((id, i) => ({
-      id,
-      titulo: lixo.titulos[i],
-      catalog_product_id: lixo.catalog_product_ids[i],
-      price: ~~(lixo.prices[i] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
-      permalink: lixo.permalinks[i],
-      gtin: lixo.GTINS[i],
-      sku: lixo.SKUS[i],
-    }));
-    const resposta = await minha_query({
+    product_ids_reversed = product_ids.sort().toReversed();
+
+    // loop de 20 em 20 de 0 ate 1167
+    // console.log(product_ids_reversed);
+    for (let i = 0; i < Math.ceil(product_ids_reversed.length / 20); i++) {
+      console.log(i);
+      const lixo = await atributos(
+        product_ids_reversed.slice(i * 20, (i + 1) * 20) //end not included
+      );
+      // console.log("********************************************", lixo);
+      var lixo_lista_jsons = await lixo.ids.map((id, x) => ({
+        id,
+        titulo: lixo.titulos[x],
+        catalog_product_id: lixo.catalog_product_ids[x],
+        price: ~~(lixo.prices[x] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
+        permalink: lixo.permalinks[x],
+        gtin: lixo.GTINS[x],
+        sku: lixo.SKUS[x],
+      }));
+      // console.log("********************************************", lixo_lista_jsons);
+      lixo_lista_jsons_agregado.push(...lixo_lista_jsons);
+      console.log(
+        "lixo_lista_jsons************************************************************************************************",
+        lixo_lista_jsons
+      );
+    }
+
+    console.log(
+      "lixo_lista_jsons_agregado************************************************************************************************",
+      lixo_lista_jsons_agregado
+    );
+
+    // DROPA;
+    const drop = await minha_query({
+      texto: "DROP TABLE IF EXISTS public.anuncios",
+      nome: "drop",
+    });
+    console.log(`Drop ${drop}`);
+
+    // CREATE;
+    const create = await minha_query({
+      texto: `create table anuncios (
+              id VARCHAR(100),
+              titulo VARCHAR(200),
+              catalog_product_id VARCHAR(100),
+              price INT,
+              permalink VARCHAR(200),
+              gtin VARCHAR(100),
+              sku VARCHAR(100),
+              data_atualizacao TIMESTAMP(0) DEFAULT (CURRENT_TIMESTAMP(0)-interval '3 hour')
+              )`,
+      nome: "create",
+    });
+    console.log(`Create ${create}`);
+
+    // Insere
+    const inserir = await minha_query({
       texto:
         `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,sku)` +
         "SELECT id,titulo,catalog_product_id,price,permalink,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
-      params: [JSON.stringify(lixo_json)],
-      callback: function (err, asdf) {
-        if (err) {
-          console.log("ERRO: DASPFspfkDSPFGSkfsdf", err);
-          res.render("home", {
-            url_api: url,
-            resultado_api: JSON.stringify(err),
-            code: MELI_CODE,
-            token: MELI_TOKEN,
-          });
-        } else {
-          // res.send(resposta);
-          console.log(resposta);
-          const agora = new Date();
-          const tempo = `${
-            (agora.getUTCHours() - 3 < 10 ? "0" : "") +
-            (agora.getUTCHours() - 3)
-          }:${
-            (agora.getUTCMinutes() < 10 ? "0" : "") + agora.getUTCMinutes()
-          }:${(agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()}`;
-          // console.log(tempo);
-          res.render("home", {
-            url_api: url,
-            resultado_api: `Table de Anúncios atualizada com sucesso em ${tempo}.`,
-            code: MELI_CODE,
-            token: MELI_TOKEN,
-          });
-        }
-      },
+      params: [JSON.stringify(lixo_lista_jsons_agregado)],
+      nome: "inserir",
+    });
+    console.log(`Inserção ${inserir}`);
+
+    const agora = new Date();
+    const tempo = `${
+      (agora.getUTCHours() - 3 < 10 ? "0" : "") + (agora.getUTCHours() - 3)
+    }:${(agora.getUTCMinutes() < 10 ? "0" : "") + agora.getUTCMinutes()}:${
+      (agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()
+    }`;
+    // res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
+    res.render("home", {
+      url_api: url,
+      resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
+      code: MELI_CODE,
+      token: MELI_TOKEN,
     });
   } catch (error) {
     console.log(error);
