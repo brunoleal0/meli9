@@ -430,7 +430,7 @@ app.get("/anuncios20", async (req, res) => {
     }`;
     // res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
     res.render("home", {
-      url_api: url,
+      url_api: `${url} e https://api.mercadolibre.com/items?`,
       resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
       code: MELI_CODE,
       token: MELI_TOKEN,
@@ -438,7 +438,7 @@ app.get("/anuncios20", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.render("home", {
-      url_api: url,
+      url_api: `${url} e https://api.mercadolibre.com/items?`,
       resultado_api: error,
       code: "",
       token: "",
@@ -541,7 +541,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
     }`;
     // res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
     res.render("home", {
-      url_api: url,
+      url_api: `${url} e https://api.mercadolibre.com/items?`,
       resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
       code: MELI_CODE,
       token: MELI_TOKEN,
@@ -549,7 +549,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.render("home", {
-      url_api: url,
+      url_api: `${url} e https://api.mercadolibre.com/items?`,
       resultado_api: error,
       code: "",
       token: "",
