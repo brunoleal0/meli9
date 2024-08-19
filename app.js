@@ -426,9 +426,17 @@ app.get("/atualizatabela", async (req, res) => {
         } else {
           // res.send(resposta);
           console.log(resposta);
+          const agora = new Date();
+          const tempo = `${
+            (agora.getUTCHours() - 3 < 10 ? "0" : "") +
+            (agora.getUTCHours() - 3)
+          }:${
+            (agora.getUTCMinutes() < 10 ? "0" : "") + agora.getUTCMinutes()
+          }:${(agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()}`;
+          // console.log(tempo);
           res.render("home", {
             url_api: url,
-            resultado_api: "Banco de dados atualizado com sucesso.",
+            resultado_api: `Table de Anúncios atualizada com sucesso em ${tempo}.`,
             code: MELI_CODE,
             token: MELI_TOKEN,
           });
