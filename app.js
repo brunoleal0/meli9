@@ -349,32 +349,103 @@ app.post("/consultaseller", async (req, res) => {
 });
 
 // https://node-postgres.com/guides/project-structure
-const minha_query = async (text, params, callback) => {
+async function minha_query({ texto, params, nome = "sem_nome", callback }) {
   const start = Date.now();
   try {
-    const resposta = await pool.query(text, params, callback); //pool.query handla fechar a conexao do cliente
+    const resposta = await pool.query(texto, params, callback); //pool.query handla fechar a conexao do cliente
     const end = Date.now();
     const duration = end - start;
-    console.log(`sucess query ${duration / 1000}s`);
+    console.log(`sucess query ${nome}: ${duration / 1000}s`);
     return resposta;
   } catch (error) {
     const end = Date.now();
     const duration = end - start;
-    console.log(`error query ${duration / 1000}s`);
+    console.log(`error query ${nome}: ${duration / 1000}s`);
     return error;
   }
-};
+}
 
 app.get("/databasepoolstructure", async (req, res) => {
-  const resposta = await minha_query("SELECT * from public.teste");
+  const resposta = await minha_query({ texto: "SELECT * from public.teste" });
   console.log(resposta);
   res.send(resposta);
 });
 
-app.get("/atualizatabela", async (req, res) => {
-  // const id = "107585822"; //Pessoal
-  const id = "1375484326"; //MM
-  const url = `https://api.mercadolibre.com/users/${id}/items/search`;
+app.get("/anuncios20", async (req, res) => {
+  const url = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
+  var scroll_id_x = [""];
+  var product_ids = [];
+  try {
+    const result = await axios.get(url, {
+      headers: `Authorization: Bearer ${fake_meli_token}`,
+    });
+    for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
+      console.log(`Loop ${i}`);
+      const result_x = await axios.get(url, {
+        params: {
+          search_type: "scan",
+          limit: "100",
+          scroll_id: scroll_id_x[i], //na prática é como se puxasse de i-1 pq scroll_id_x[0] ja eh iniciado com o valor "" antes da primeira iteracao
+        },
+        headers: `Authorization: Bearer ${fake_meli_token}`,
+      });
+      scroll_id_x.push(result_x.data.scroll_id);
+      product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
+    }
+    product_ids_reversed = product_ids.sort().toReversed();
+    const lixo = await atributos(product_ids_reversed.slice(0, 20)); //ultimos 20
+    // console.log("********************************************", lixo);
+    var lixo_json = await lixo.ids.map((id, i) => ({
+      id,
+      titulo: lixo.titulos[i],
+      catalog_product_id: lixo.catalog_product_ids[i],
+      price: ~~(lixo.prices[i] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
+      permalink: lixo.permalinks[i],
+      gtin: lixo.GTINS[i],
+      sku: lixo.SKUS[i],
+    }));
+    // console.log("********************************************", lixo_json);
+    const deletar = await minha_query({
+      texto: "DELETE FROM public.anuncios WHERE id = ANY ($1)",
+      params: [lixo.ids],
+      nome: "deletar",
+    });
+    console.log(`Deleção ${deletar}`);
+    const inserir = await minha_query({
+      texto:
+        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,sku)` +
+        "SELECT id,titulo,catalog_product_id,price,permalink,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
+      params: [JSON.stringify(lixo_json)],
+      nome: "inserir",
+    });
+    console.log(`Inserção ${inserir}`);
+
+    const agora = new Date();
+    const tempo = `${
+      (agora.getUTCHours() - 3 < 10 ? "0" : "") + (agora.getUTCHours() - 3)
+    }:${(agora.getUTCMinutes() < 10 ? "0" : "") + agora.getUTCMinutes()}:${
+      (agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()
+    }`;
+    res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
+    // res.render("home", {
+    //   url_api: url,
+    //   resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
+    //   code: MELI_CODE,
+    //   token: MELI_TOKEN,
+    // });
+  } catch (error) {
+    console.log(error);
+    res.render("home", {
+      url_api: url,
+      resultado_api: error,
+      code: "",
+      token: "",
+    });
+  }
+});
+
+app.get("/anunciosdropcreateinserttable", async (req, res) => {
+  const url = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
   var scroll_id_x = [""];
   var product_ids = [];
   try {
@@ -410,11 +481,12 @@ app.get("/atualizatabela", async (req, res) => {
       gtin: lixo.GTINS[i],
       sku: lixo.SKUS[i],
     }));
-    const resposta = await minha_query(
-      `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,sku)` +
+    const resposta = await minha_query({
+      texto:
+        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,gtin,sku)` +
         "SELECT id,titulo,catalog_product_id,price,permalink,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
-      [JSON.stringify(lixo_json)],
-      function (err, asdf) {
+      params: [JSON.stringify(lixo_json)],
+      callback: function (err, asdf) {
         if (err) {
           console.log("ERRO: DASPFspfkDSPFGSkfsdf", err);
           res.render("home", {
@@ -441,8 +513,8 @@ app.get("/atualizatabela", async (req, res) => {
             token: MELI_TOKEN,
           });
         }
-      }
-    );
+      },
+    });
   } catch (error) {
     console.log(error);
     res.render("home", {
