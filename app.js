@@ -1,5 +1,5 @@
 const fake_meli_token =
-  "APP_USR-4576000651843598-082009-236227294a273ac8cae938278e3b0b9a-1375484326";
+  "APP_USR-4576000651843598-082015-37a44c3c4c83277abfb0ee49c13e728d-1375484326";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -9,9 +9,9 @@ require("dotenv").config();
 const session = require("express-session");
 const passport = require("passport");
 const { Strategy } = require("passport-local");
-const { Pool, Client } = require("pg");
-const { type } = require("os");
-const { error } = require("console");
+const { Pool } = require("pg");
+// const { type } = require("os");
+// const { error } = require("console");
 const {
   CLIENT_ID,
   CLIENT_SECRET,
@@ -549,16 +549,17 @@ app.get("/atualizartablefrete", async (req, res) => {
         // console.log(ultima_data_atualizacao.rowCount);
         // console.log(ultima_data_atualizacao.rows[0].data_atualizacao);
         // res.send(ultima_data_atualizacao);
+        // res.send("adf");
         res.render("home", {
           url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
           resultado_api:
-            `<h2> UHUL1 </h2>` +
-            `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez. \n` +
-            `<hr />` +
-            "Table fretes parcialmente atualizada. \n" +
-            "<h2> UHUL2 </h2>" +
-            "<hr />" +
-            `${ultima_data_atualizacao.rowCount} ids têm a mais antiga data de atualização: ${ultima_data_atualizacao.rows[0].data_atualizacao}.` +
+            // `<h2> UHUL1 </h2>` +
+            // `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez. \n` +
+            // `<hr />` +
+            // "Table fretes parcialmente atualizada. \n" +
+            // "<h2> UHUL2 </h2>" +
+            // "<hr />" +
+            // `${ultima_data_atualizacao.rowCount} ids têm a mais antiga data de atualização: ${ultima_data_atualizacao.rows[0].data_atualizacao}.` +
             `Clicar novamente no botão para atualizar novamente a table`,
           code: MELI_CODE,
           token: MELI_TOKEN,
