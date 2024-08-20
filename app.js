@@ -209,7 +209,7 @@ async function atributos(ids_bla) {
     params: {
       ids: ids_bla.toString(),
       attributes:
-        "id,title,price,permalink,available_quantity,sold_quantity,catalog_product_id,attributes.id,attributes.name,attributes.value_name",
+        "id,title,price,permalink,available_quantity,sold_quantity,date_created,last_updated,catalog_product_id,attributes.id,attributes.name,attributes.value_name",
       include_attributes: "all",
       // include_internal_attributes: true,
     },
@@ -219,8 +219,7 @@ async function atributos(ids_bla) {
   // https://stackoverflow.com/questions/66330228/how-to-destructure-an-array-of-objects-into-multiple-arrays-of-its-keys
   // https://www.udemy.com/course/the-complete-javascript-course/learn/lecture/22648731#overview
   // console.log(Object.values(result.data));
-  console.log();
-  console.log("atributos: ", JSON.stringify(result.data));
+  // console.log("atributos: ", JSON.stringify(result.data));
   const {
     ids,
     titulos,
@@ -229,6 +228,8 @@ async function atributos(ids_bla) {
     permalinks,
     available_quantity,
     sold_quantity,
+    date_created,
+    last_updated,
     GTINS,
     SKUS,
   } = {
@@ -241,13 +242,14 @@ async function atributos(ids_bla) {
     permalinks: result.data.map((lixo) => lixo.body.permalink),
     available_quantity: result.data.map((lixo) => lixo.body.available_quantity),
     sold_quantity: result.data.map((lixo) => lixo.body.sold_quantity),
+    date_created: result.data.map((lixo) => lixo.body.date_created),
+    last_updated: result.data.map((lixo) => lixo.body.last_updated),
     GTINS: result.data.map(function (lixo) {
       for (i in lixo.body.attributes) {
         if (lixo.body.attributes[i].id == "GTIN") {
-          console.log(i);
           return lixo.body.attributes[i].value_name;
         } else {
-          console.log("GTIN", i);
+          // console.log("GTIN", i);
         }
       }
       return "999";
@@ -255,10 +257,9 @@ async function atributos(ids_bla) {
     SKUS: result.data.map(function (lixo) {
       for (i in lixo.body.attributes) {
         if (lixo.body.attributes[i].id == "SELLER_SKU") {
-          console.log(i);
           return lixo.body.attributes[i].value_name;
         } else {
-          console.log("SKU", i);
+          // console.log("SKU", i);
         }
       }
       return "ERRO";
@@ -283,6 +284,8 @@ async function atributos(ids_bla) {
     permalinks,
     available_quantity,
     sold_quantity,
+    date_created,
+    last_updated,
     GTINS,
     SKUS,
   };
@@ -388,89 +391,50 @@ async function minha_query({ texto, params, nome = "sem_nome", callback }) {
   }
 }
 
-app.get("/databasepoolstructure", async (req, res) => {
-  const resposta = await minha_query({ texto: "SELECT * from public.teste" });
-  console.log(resposta);
-  res.send(resposta);
-});
-
-app.get("/anuncios20", async (req, res) => {
-  const url = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
-  var scroll_id_x = [""];
-  var product_ids = [];
+async function puxar_fretes(array_ids) {
   try {
-    const result = await axios.get(url, {
-      headers: `Authorization: Bearer ${fake_meli_token}`,
-    });
-    for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
-      console.log(`Loop ${i}`);
-      const result_x = await axios.get(url, {
+    url = `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free`;
+    const resposta = [];
+    for (i in array_ids) {
+      // console.log(i);
+      const resposta_x = await axios.get(url, {
         params: {
-          search_type: "scan",
-          limit: "100",
-          scroll_id: scroll_id_x[i], //na prática é como se puxasse de i-1 pq scroll_id_x[0] ja eh iniciado com o valor "" antes da primeira iteracao
+          item_id: array_ids[i],
         },
         headers: `Authorization: Bearer ${fake_meli_token}`,
       });
-      scroll_id_x.push(result_x.data.scroll_id);
-      product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
+      console.log(
+        `frete ${i}: ${resposta_x.data.coverage.all_country.list_cost}`
+      );
+      resposta.push({
+        id: array_ids[i],
+        frete: resposta_x.data.coverage.all_country.list_cost,
+      });
     }
-    product_ids_reversed = product_ids.sort().toReversed();
-    const lixo = await atributos(product_ids_reversed.slice(0, 20)); //ultimos 20
-    // console.log("********************************************", lixo);
-    var lixo_lista_jsons = await lixo.ids.map((id, x) => ({
-      id,
-      titulo: lixo.titulos[x],
-      catalog_product_id: lixo.catalog_product_ids[x],
-      price: ~~(lixo.prices[x] * 100), //https://stackoverflow.com/questions/34077449/fastest-way-to-cast-a-float-to-an-int-in-javascript
-      permalink: lixo.permalinks[x],
-      available_quantity: ~~lixo.available_quantity[x],
-      sold_quantity: ~~lixo.sold_quantity[x],
-      gtin: lixo.GTINS[x],
-      sku: lixo.SKUS[x],
-    }));
-    // console.log(
-    //   "********************************************",
-    //   lixo_lista_jsons
-    // );
-    const deletar = await minha_query({
-      texto: "DELETE FROM public.anuncios WHERE id = ANY ($1)",
-      params: [lixo.ids],
-      nome: "deletar",
-    });
-    console.log(`Deleção ${deletar}`);
-    const inserir = await minha_query({
-      texto:
-        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,gtin,sku)` +
-        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
-      params: [JSON.stringify(lixo_lista_jsons)],
-      nome: "inserir",
-    });
-    console.log(`Inserção ${inserir}`);
-
-    const agora = new Date();
-    const tempo = `${
-      (agora.getUTCHours() - 3 < 10 ? "0" : "") + (agora.getUTCHours() - 3)
-    }:${(agora.getUTCMinutes() < 10 ? "0" : "") + agora.getUTCMinutes()}:${
-      (agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()
-    }`;
-    // res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
-    res.render("home", {
-      url_api: `${url} e https://api.mercadolibre.com/items?`,
-      resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
-      code: MELI_CODE,
-      token: MELI_TOKEN,
-    });
+    console.log(resposta);
+    // console.log("frete OK");
+    return resposta;
   } catch (error) {
-    console.log(error);
-    res.render("home", {
-      url_api: `${url} e https://api.mercadolibre.com/items?`,
-      resultado_api: error,
-      code: "",
-      token: "",
-    });
+    console.log("frete error: ", error);
+    return error;
   }
-});
+}
+puxar_fretes(["MLB3883535212"]);
+
+// Juntar 2 JSONS baseado na chave
+// const a_json = [
+//   { id: "KDSAopdakso", fruta: "banana", nome: "bruno" },
+//   { id: "ASKPDOAK", fruta: "melancia", nome: "camila" },
+// ];
+// const b_json = [
+//   { id: "KDSAopdakso", sobrenome: "leal" },
+//   { id: "ASKPDOAK", sobrenome: "hennies" },
+// ];
+// // var DASKdsaKASDO = { ...a_json[0], ...b_json[0] };
+// var DASKdsaKASDO = a_json.map((x, i) => {
+//   return { ...a_json[i], ...b_json[i] };
+// });
+// console.log(DASKdsaKASDO);
 
 app.get("/anunciosdropcreateinserttable", async (req, res) => {
   const url = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
@@ -495,11 +459,10 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
     }
     product_ids_reversed = product_ids.sort().toReversed();
-
     // loop de 20 em 20 de 0 ate 1167
     // console.log(product_ids_reversed);
     for (let i = 0; i < Math.ceil(product_ids_reversed.length / 20); i++) {
-      console.log(i);
+      console.log(`atributos ${i}`);
       const lixo = await atributos(
         product_ids_reversed.slice(i * 20, (i + 1) * 20) //end not included
       );
@@ -512,20 +475,17 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
         permalink: lixo.permalinks[x],
         available_quantity: ~~lixo.available_quantity[x],
         sold_quantity: ~~lixo.sold_quantity[x],
+        date_created: lixo.date_created[x],
+        last_updated: lixo.last_updated[x],
         gtin: lixo.GTINS[x],
         sku: lixo.SKUS[x],
       }));
       // console.log(
-      //   "********************************************",
+      //   "lixo_lista_jsons******************************************************************************************************",
       //   lixo_lista_jsons
       // );
       lixo_lista_jsons_agregado.push(...lixo_lista_jsons);
-      console.log(
-        "lixo_lista_jsons************************************************************************************************",
-        lixo_lista_jsons
-      );
     }
-
     console.log(
       "lixo_lista_jsons_agregado************************************************************************************************",
       lixo_lista_jsons_agregado
@@ -548,6 +508,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
               permalink VARCHAR(200),
               available_quantity INT,
               sold_quantity INT,
+              date_created TIMESTAMPTZ,
+              last_updated TIMESTAMPTZ,
               gtin VARCHAR(100),
               sku VARCHAR(100),
               data_atualizacao TIMESTAMP(0) DEFAULT (CURRENT_TIMESTAMP(0)-interval '3 hour')
@@ -559,8 +521,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
     // Insere
     const inserir = await minha_query({
       texto:
-        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,gtin,sku)` +
-        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
+        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku)` +
+        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
       params: [JSON.stringify(lixo_lista_jsons_agregado)],
       nome: "inserir",
     });
