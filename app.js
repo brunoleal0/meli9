@@ -1,5 +1,5 @@
 const fake_meli_token =
-  "APP_USR-4576000651843598-081917-aa530283ef6402e832feb1a5d014439e-1375484326";
+  "APP_USR-4576000651843598-082009-236227294a273ac8cae938278e3b0b9a-1375484326";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -10,6 +10,8 @@ const session = require("express-session");
 const passport = require("passport");
 const { Strategy } = require("passport-local");
 const { Pool, Client } = require("pg");
+const { type } = require("os");
+const { error } = require("console");
 const {
   CLIENT_ID,
   CLIENT_SECRET,
@@ -391,50 +393,182 @@ async function minha_query({ texto, params, nome = "sem_nome", callback }) {
   }
 }
 
+// async function teste_query(array_ids) {
+//   resposta = await minha_query({
+//     texto: "SELECT id FROM public.anuncios WHERE id = ANY($1)",
+//     params: [array_ids],
+//     nome: "akldspka",
+//   });
+//   console.log(resposta);
+//   return resposta;
+// }
+// teste_query(["MLB4945040624", "MLB4922063120"]);
+
+// async function joga_erro() {
+//   try {
+//     const url1 = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
+//     const result = await axios.get(url1, {
+//       headers: `Authorization: Bearer OKADodak`,
+//     });
+//   } catch (error) {
+//     console.log("joga_erro ERRO", error.response.status);
+//     throw error; //NECESSÁRIO
+//   }
+// }
+
+// app.get("/testaerro", async (req, res) => {
+//   console.log("começa");
+//   try {
+//     const asdf = await joga_erro();
+//     console.log("isso não roda");
+//   } catch (err) {
+//     console.log("quando erra vem p/ k");
+//     if (err.response.data.status == 400) {
+//       console.log("erro 400");
+//     } else {
+//       console.log("outro erro", err.response.data.status);
+//     }
+//     // console.log(err);
+//     // console.log(err.statusCode);
+//     res.send(err); //funciona
+//   }
+// });
+
+let array_jsons_frete_apelado = [];
 async function puxar_fretes(array_ids) {
+  const resposta = [];
   try {
     url = `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free`;
-    const resposta = [];
     for (i in array_ids) {
-      // console.log(i);
       const resposta_x = await axios.get(url, {
         params: {
           item_id: array_ids[i],
         },
         headers: `Authorization: Bearer ${fake_meli_token}`,
       });
+      // if (i == 10) {
+      //   const kdadksa = { status: "8932" };
+      //   throw kdadksa;
+      // }
       console.log(
-        `frete ${i}: ${resposta_x.data.coverage.all_country.list_cost}`
+        `Frete: Loop ${i}: ${resposta_x.data.coverage.all_country.list_cost}`
       );
-      resposta.push({
+      array_jsons_frete_apelado.push({
         id: array_ids[i],
         frete: resposta_x.data.coverage.all_country.list_cost,
       });
     }
-    console.log(resposta);
-    // console.log("frete OK");
-    return resposta;
+    // console.log(resposta);
+    console.log("frete rodou tudo - impossibru");
+    return { resposta, i };
   } catch (error) {
-    console.log("frete error: ", error);
-    return error;
+    console.log("Frete: function error");
+    // console.log("frete error: ", error);
+    // return { resposta, i, error }; //retorna a resposta mesmo qdo dá erro pra poder subir o q der no Database(rate limit não permite rodar a API >250 vezes)
+    throw error;
   }
 }
-puxar_fretes(["MLB3883535212"]);
+// puxar_fretes(["MLB3883535212"]);
 
-// Juntar 2 JSONS baseado na chave
-// const a_json = [
-//   { id: "KDSAopdakso", fruta: "banana", nome: "bruno" },
-//   { id: "ASKPDOAK", fruta: "melancia", nome: "camila" },
-// ];
-// const b_json = [
-//   { id: "KDSAopdakso", sobrenome: "leal" },
-//   { id: "ASKPDOAK", sobrenome: "hennies" },
-// ];
-// // var DASKdsaKASDO = { ...a_json[0], ...b_json[0] };
-// var DASKdsaKASDO = a_json.map((x, i) => {
-//   return { ...a_json[i], ...b_json[i] };
-// });
-// console.log(DASKdsaKASDO);
+app.get("/atualizartablefrete", async (req, res) => {
+  var scroll_id_x = [""];
+  var product_ids = [];
+  const url1 = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
+  try {
+    const result = await axios.get(url1, {
+      headers: `Authorization: Bearer ${fake_meli_token}`,
+    });
+    for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
+      console.log(`Anúncios: Loop ${i}`);
+      const result_x = await axios.get(url1, {
+        params: {
+          search_type: "scan",
+          limit: "100",
+          scroll_id: scroll_id_x[i], //na prática é como se puxasse de i-1 pq scroll_id_x[0] ja eh iniciado com o valor "" antes da primeira iteracao
+        },
+        headers: `Authorization: Bearer ${fake_meli_token}`,
+      });
+      scroll_id_x.push(result_x.data.scroll_id);
+      product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
+    }
+    product_ids_reversed = product_ids.sort().toReversed();
+
+    console.log(product_ids_reversed);
+    let dict_product_ids_reversed = product_ids_reversed.map((i, y) => ({
+      id: product_ids_reversed[y],
+    }));
+    console.log(dict_product_ids_reversed);
+
+    //Inserindo IDs novos na table de frete
+    const inserir = await minha_query({
+      texto:
+        `INSERT INTO public.fretes (id)` +
+        "SELECT id FROM json_populate_recordset (null::fretes, $1)" +
+        "ON CONFLICT DO NOTHING",
+      params: [JSON.stringify(dict_product_ids_reversed)],
+      nome: "inserir",
+    });
+    console.log(`Frete: Inserção parcial dos IDs ${inserir}`);
+
+    //Selecionando os IDs menor data_atualizacao
+    const menos_atualizados = await minha_query({
+      texto: `SELECT id FROM public.fretes ORDER BY data_atualizacao ASC, id DESC`,
+      nome: "Frete: ids menor data_atualizacao",
+    });
+    // res.send(menos_atualizados);
+    // console.log(menos_atualizados.rows);
+    const lista_menos_atualizados = menos_atualizados.rows.map(({ id }) => id);
+    // res.send(lista_menos_atualizados);
+
+    await puxar_fretes(lista_menos_atualizados); //os resultados são salvos numa variável global pq n sei se dá pra retornar error E o return da API
+    res.send("Frete: rodou sem dar erro 429????");
+  } catch (err) {
+    console.log("Frete: qdo erra vem pra cá");
+    console.log(`Frete: array_jsons_frete_apelado`);
+    console.log(array_jsons_frete_apelado);
+    if (err.response.data.status == 429) {
+      console.log("erro 429: excesso de requisições");
+      try {
+        const inserir = await minha_query({
+          texto:
+            `INSERT INTO public.fretes (id,frete)` +
+            "SELECT id,frete FROM json_populate_recordset(null::fretes, $1)" +
+            "ON CONFLICT(id) DO UPDATE SET frete = EXCLUDED.frete, data_atualizacao=CURRENT_TIMESTAMP(0)-interval '3 hour'",
+          params: [JSON.stringify(array_jsons_frete_apelado)],
+          nome: "Frete: inserir",
+        });
+        console.log(`Frete: Inserção parcial dos fretes_apelados`);
+        // console.log(inserir);
+        const ultima_data_atualizacao = await minha_query({
+          texto:
+            "SELECT id, data_atualizacao FROM public.fretes WHERE data_atualizacao IN" +
+            "(SELECT data_atualizacao FROM public.fretes GROUP BY data_atualizacao LIMIT 1)",
+          nome: "Frete: Puxar ultima data_atualizacao",
+        });
+        // console.log(ultima_data_atualizacao);
+        // console.log(ultima_data_atualizacao.rowCount);
+        // console.log(ultima_data_atualizacao.rows[0].data_atualizacao);
+        // res.send(ultima_data_atualizacao);
+        res.render("home", {
+          url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
+          resultado_api:
+            `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez. \n` +
+            `Table fretes parcialmente atualizada.` +
+            `${ultima_data_atualizacao.rowCount} ids têm a mais antiga data de atualização: ${ultima_data_atualizacao.rows[0].data_atualizacao}.` +
+            `Clicar novamente no botão para atualizar novamente a table`,
+          code: MELI_CODE,
+          token: MELI_TOKEN,
+        });
+      } catch (error2) {
+        console.log("Frete: Error2");
+        res.send(error2);
+      }
+    } else {
+      console.log("Frete: Erro status:", err.response.data.status);
+      res.send(err);
+    }
+  }
+});
 
 app.get("/anunciosdropcreateinserttable", async (req, res) => {
   const url = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
@@ -446,7 +580,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       headers: `Authorization: Bearer ${fake_meli_token}`,
     });
     for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
-      console.log(`Loop ${i}`);
+      console.log(`Anúncios: Loop ${i}`);
       const result_x = await axios.get(url, {
         params: {
           search_type: "scan",
@@ -534,10 +668,9 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
     }:${(agora.getUTCMinutes() < 10 ? "0" : "") + agora.getUTCMinutes()}:${
       (agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()
     }`;
-    // res.send(`Table de Anúncios atualizada com sucesso em ${tempo}.`);
     res.render("home", {
       url_api: `${url} e https://api.mercadolibre.com/items?`,
-      resultado_api: `Últimos 20 Anúncios atualizados com sucesso em ${tempo}.`,
+      resultado_api: `Anúncios atualizados com sucesso em ${tempo}.`,
       code: MELI_CODE,
       token: MELI_TOKEN,
     });
