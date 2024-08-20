@@ -553,13 +553,13 @@ app.get("/atualizartablefrete", async (req, res) => {
         res.render("home", {
           url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
           resultado_api:
-            // `<h2> UHUL1 </h2>` +
-            // `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez. \n` +
-            // `<hr />` +
-            // "Table fretes parcialmente atualizada. \n" +
-            // "<h2> UHUL2 </h2>" +
-            // "<hr />" +
-            // `${ultima_data_atualizacao.rowCount} ids têm a mais antiga data de atualização: ${ultima_data_atualizacao.rows[0].data_atualizacao}.` +
+            `<h2> UHUL1 </h2>` +
+            `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez. \n` +
+            `<hr />` +
+            "Table fretes parcialmente atualizada. \n" +
+            "<h2> UHUL2 </h2>" +
+            "<hr />" +
+            `${ultima_data_atualizacao.rowCount} ids têm a mais antiga data de atualização: ${ultima_data_atualizacao.rows[0].data_atualizacao}.` +
             `Clicar novamente no botão para atualizar novamente a table`,
           code: MELI_CODE,
           token: MELI_TOKEN,
