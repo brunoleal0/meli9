@@ -1,3 +1,4 @@
+console.log("heroku logs --app=meli9 --tail"); //pra ver os logs do heroku
 const fake_meli_token =
   "APP_USR-4576000651843598-082113-7abe9053fa9580faf4d5e9771ca944b4-1375484326";
 
@@ -354,12 +355,12 @@ async function minha_query({ texto, params, nome = "sem_nome", callback }) {
     const resposta = await pool.query(texto, params, callback); //pool.query handla fechar a conexao do cliente
     const end = Date.now();
     const duration = end - start;
-    console.log(`sucess query ${nome}: ${duration / 1000}s`);
+    console.log(`SUCESS query ${nome}: ${duration / 1000}s`);
     return resposta;
   } catch (error) {
     const end = Date.now();
     const duration = end - start;
-    console.log(`error query ${nome}: ${duration / 1000}s`);
+    console.log(`ERROR query ${nome}: ${duration / 1000}s`);
     return error;
   }
 }
@@ -639,11 +640,14 @@ app.get("/atualizartablefretes", async (req, res) => {
     // console.log(menos_atualizados.rows);
     const lista_menos_atualizados = menos_atualizados.rows.map(({ id }) => id);
     await puxar_fretes(lista_menos_atualizados); //os resultados são salvos na variável global ${array_jsons_frete_apelado} pq n sei se dá pra retornar error E o return da API
-    res.send("Frete: rodou sem dar erro 429????");
+    res.send(
+      "Frete: App fez mais de 1000 requisições na API sem dar erro 429???? Impossibru"
+    );
   } catch (err) {
     console.log("Frete: qdo erra vem pra cá");
-    console.log(`Frete: array_jsons_frete_apelado`);
-    console.log(array_jsons_frete_apelado);
+    console.log(
+      `Frete: array_jsons_frete_apelado ${array_jsons_frete_apelado}`
+    );
     if (err.response.data.status == 429) {
       console.log("erro 429: excesso de requisições");
       try {
