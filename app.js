@@ -1,5 +1,5 @@
 const fake_meli_token =
-  "APP_USR-4576000651843598-082020-7460da756bf882cf1cf1d2e2002362ed-1375484326";
+  "APP_USR-4576000651843598-082113-7abe9053fa9580faf4d5e9771ca944b4-1375484326";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -211,7 +211,7 @@ async function atributos(ids_bla) {
     params: {
       ids: ids_bla.toString(),
       attributes:
-        "id,title,price,permalink,available_quantity,sold_quantity,date_created,last_updated,catalog_product_id,attributes.id,attributes.name,attributes.value_name",
+        "id,title,price,permalink,available_quantity,sold_quantity,date_created,last_updated,catalog_product_id,attributes.id,attributes.name,attributes.value_name,shipping.free_shipping,shipping.tags",
       include_attributes: "all",
       // include_internal_attributes: true,
     },
@@ -234,6 +234,8 @@ async function atributos(ids_bla) {
     last_updated,
     GTINS,
     SKUS,
+    free_shipping,
+    shipping_tags,
   } = {
     ids: result.data.map((lixo) => lixo.body.id),
     titulos: result.data.map((lixo) => lixo.body.title),
@@ -266,20 +268,9 @@ async function atributos(ids_bla) {
       }
       return "ERRO";
     }),
+    free_shipping: result.data.map((lixo) => lixo.body.shipping.free_shipping),
+    shipping_tags: result.data.map((lixo) => lixo.body.shipping.tags),
   };
-  // console.log(
-  //   ids,
-  //   titulos,
-  //   catalog_product_ids,
-  //   prices,
-  //   permalinks,
-  //   available_quantity,
-  //   sold_quantity,
-  //   date_created,
-  //   last_updated,
-  //   GTINS,
-  //   SKUS
-  // );
   return {
     ids,
     titulos,
@@ -292,6 +283,8 @@ async function atributos(ids_bla) {
     last_updated,
     GTINS,
     SKUS,
+    free_shipping,
+    shipping_tags,
   };
 }
 
@@ -420,15 +413,17 @@ async function puxar_fretes(array_ids) {
         headers: `Authorization: Bearer ${fake_meli_token}`,
       });
       // if (i == 10) {
-      //   const kdadksa = { status: "8932" };
-      //   throw kdadksa;
+      //   throw { status: "8932" };
       // }
       console.log(
         `Frete: Loop ${i}: ${resposta_x.data.coverage.all_country.list_cost}`
       );
       array_jsons_frete_apelado.push({
         id: array_ids[i],
-        frete: resposta_x.data.coverage.all_country.list_cost,
+        custo_frete_gratis: ~~(
+          100 * resposta_x.data.coverage.all_country.list_cost
+        ),
+        billable_weight: ~~resposta_x.data.coverage.all_country.billable_weight,
       });
     }
     // console.log(resposta);
@@ -671,7 +666,7 @@ app.get("/pedidosupserttable", async (req, res) => {
   }
 });
 
-app.get("/atualizartablefrete", async (req, res) => {
+app.get("/atualizartablefretes", async (req, res) => {
   var scroll_id_x = [""];
   var product_ids = [];
   const url1 = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
@@ -709,7 +704,7 @@ app.get("/atualizartablefrete", async (req, res) => {
       params: [JSON.stringify(dict_product_ids_reversed)],
       nome: "inserir",
     });
-    console.log(`Frete: Inserção parcial dos IDs ${inserir}`);
+    console.log(`Frete: Inserção dos IDs novos ${inserir}`);
 
     //Selecionando os IDs menor data_atualizacao
     const menos_atualizados = await minha_query({
@@ -732,9 +727,9 @@ app.get("/atualizartablefrete", async (req, res) => {
       try {
         const inserir = await minha_query({
           texto:
-            `INSERT INTO public.fretes (id,frete)` +
-            "SELECT id,frete FROM json_populate_recordset(null::fretes, $1)" +
-            "ON CONFLICT(id) DO UPDATE SET frete = EXCLUDED.frete, data_atualizacao=CURRENT_TIMESTAMP(0)-interval '3 hour'",
+            `INSERT INTO public.fretes (id,custo_frete_gratis, billable_weight)` +
+            "SELECT id,custo_frete_gratis,billable_weight FROM json_populate_recordset(null::fretes, $1)" +
+            "ON CONFLICT(id) DO UPDATE SET custo_frete_gratis = EXCLUDED.custo_frete_gratis, billable_weight = EXCLUDED.billable_weight, data_atualizacao=CURRENT_TIMESTAMP(0)-interval '3 hour'",
           params: [JSON.stringify(array_jsons_frete_apelado)],
           nome: "Frete: inserir",
         });
@@ -746,11 +741,6 @@ app.get("/atualizartablefrete", async (req, res) => {
             "(SELECT data_atualizacao FROM public.fretes GROUP BY data_atualizacao LIMIT 1)",
           nome: "Frete: Puxar ultima data_atualizacao",
         });
-        // console.log(ultima_data_atualizacao);
-        // console.log(ultima_data_atualizacao.rowCount);
-        // console.log(ultima_data_atualizacao.rows[0].data_atualizacao);
-        // res.send(ultima_data_atualizacao);
-        // res.send("adf");
         res.render("home", {
           url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
           resultado_api:
@@ -815,6 +805,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
         last_updated: lixo.last_updated[x],
         gtin: lixo.GTINS[x],
         sku: lixo.SKUS[x],
+        free_shipping: lixo.free_shipping[x],
+        shipping_tags: lixo.shipping_tags[x],
       }));
       // console.log(
       //   "lixo_lista_jsons******************************************************************************************************",
@@ -824,7 +816,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
     }
     console.log(
       "lixo_lista_jsons_agregado************************************************************************************************",
-      lixo_lista_jsons_agregado
+      lixo_lista_jsons_agregado,
+      "lixo_lista_jsons_agregado_final******************************************************************************************"
     );
 
     // DROPA;
@@ -833,7 +826,6 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       nome: "drop",
     });
     console.log(`Drop ${drop}`);
-
     // CREATE;
     const create = await minha_query({
       texto: `create table anuncios (
@@ -848,6 +840,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
               last_updated TIMESTAMPTZ,
               gtin VARCHAR(100),
               sku VARCHAR(100),
+              free_shipping VARCHAR(100),
+              shipping_tags VARCHAR(100) [],
               data_atualizacao TIMESTAMP(0) DEFAULT (CURRENT_TIMESTAMP(0)-interval '3 hour')
               )`,
       nome: "create",
@@ -857,8 +851,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
     // Insere
     const inserir = await minha_query({
       texto:
-        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku)` +
-        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku FROM json_populate_recordset(null::anuncios, $1)",
+        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku,free_shipping,shipping_tags)` +
+        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku,free_shipping,shipping_tags FROM json_populate_recordset(null::anuncios, $1)",
       params: [JSON.stringify(lixo_lista_jsons_agregado)],
       nome: "inserir",
     });
@@ -871,7 +865,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       (agora.getUTCSeconds() < 10 ? "0" : "") + agora.getUTCSeconds()
     }`;
     res.render("home", {
-      url_api: `${url} e https://api.mercadolibre.com/items?`,
+      url_api: `https://api.mercadolibre.com/items?ids=`,
       resultado_api: `Anúncios atualizados com sucesso em ${tempo}.`,
       code: MELI_CODE,
       token: MELI_TOKEN,
@@ -879,7 +873,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
   } catch (error) {
     console.log(error);
     res.render("home", {
-      url_api: `${url} e https://api.mercadolibre.com/items?`,
+      url_api: `https://api.mercadolibre.com/items?ids=`,
       resultado_api: error,
       code: "",
       token: "",
