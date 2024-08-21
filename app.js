@@ -754,10 +754,10 @@ app.get("/atualizartablefrete", async (req, res) => {
         res.render("home", {
           url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
           resultado_api:
-            `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez.` +
-            "Table fretes parcialmente atualizada." +
+            `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez. ` +
+            "Table fretes parcialmente atualizada. " +
             `${ultima_data_atualizacao.rowCount} ids têm a mais antiga data de atualização: ${ultima_data_atualizacao.rows[0].data_atualizacao}.` +
-            `Clicar novamente no botão para atualizar novamente a table`,
+            ` Clicar novamente no botão para atualizar novamente a table`,
           code: MELI_CODE,
           token: MELI_TOKEN,
         });
