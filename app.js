@@ -211,16 +211,15 @@ async function atributos(ids_bla) {
     params: {
       ids: ids_bla.toString(),
       attributes:
-        "id,title,price,permalink,available_quantity,sold_quantity,date_created,last_updated,catalog_product_id,attributes.id,attributes.name,attributes.value_name,shipping.free_shipping,shipping.tags",
+        "id,title,price,permalink,available_quantity,sold_quantity,status,sub_status,date_created,last_updated,catalog_product_id,attributes.id,attributes.name,attributes.value_name,shipping.free_shipping,shipping.tags",
       include_attributes: "all",
       // include_internal_attributes: true,
     },
     headers: `Authorization: Bearer ${fake_meli_token}`,
   });
-  //https://stackoverflow.com/questions/49413544/destructuring-array-of-objects-in-es6
+  // https://stackoverflow.com/questions/49413544/destructuring-array-of-objects-in-es6
   // https://stackoverflow.com/questions/66330228/how-to-destructure-an-array-of-objects-into-multiple-arrays-of-its-keys
   // https://www.udemy.com/course/the-complete-javascript-course/learn/lecture/22648731#overview
-  // console.log(Object.values(result.data));
   // console.log("atributos: ", JSON.stringify(result.data));
   const {
     ids,
@@ -230,6 +229,8 @@ async function atributos(ids_bla) {
     permalinks,
     available_quantity,
     sold_quantity,
+    status,
+    sub_status,
     date_created,
     last_updated,
     GTINS,
@@ -246,6 +247,8 @@ async function atributos(ids_bla) {
     permalinks: result.data.map((lixo) => lixo.body.permalink),
     available_quantity: result.data.map((lixo) => lixo.body.available_quantity),
     sold_quantity: result.data.map((lixo) => lixo.body.sold_quantity),
+    status: result.data.map((lixo) => lixo.body.status),
+    sub_status: result.data.map((lixo) => lixo.body.sub_status),
     date_created: result.data.map((lixo) => lixo.body.date_created),
     last_updated: result.data.map((lixo) => lixo.body.last_updated),
     GTINS: result.data.map(function (lixo) {
@@ -279,6 +282,8 @@ async function atributos(ids_bla) {
     permalinks,
     available_quantity,
     sold_quantity,
+    status,
+    sub_status,
     date_created,
     last_updated,
     GTINS,
@@ -363,42 +368,12 @@ async function minha_query({ texto, params, nome = "sem_nome", callback }) {
 //   resposta = await minha_query({
 //     texto: "SELECT id FROM public.anuncios WHERE id = ANY($1)",
 //     params: [array_ids],
-//     nome: "akldspka",
+//     nome: "testa query",
 //   });
 //   console.log(resposta);
 //   return resposta;
 // }
 // teste_query(["MLB4945040624", "MLB4922063120"]);
-
-// async function joga_erro() {
-//   try {
-//     const url1 = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
-//     const result = await axios.get(url1, {
-//       headers: `Authorization: Bearer OKADodak`,
-//     });
-//   } catch (error) {
-//     console.log("joga_erro ERRO", error.response.status);
-//     throw error; //NECESSÁRIO
-//   }
-// }
-
-// app.get("/testaerro", async (req, res) => {
-//   console.log("começa");
-//   try {
-//     const asdf = await joga_erro();
-//     console.log("isso não roda");
-//   } catch (err) {
-//     console.log("quando erra vem p/ k");
-//     if (err.response.data.status == 400) {
-//       console.log("erro 400");
-//     } else {
-//       console.log("outro erro", err.response.data.status);
-//     }
-//     // console.log(err);
-//     // console.log(err.statusCode);
-//     res.send(err); //funciona
-//   }
-// });
 
 let array_jsons_frete_apelado = [];
 async function puxar_fretes(array_ids) {
@@ -416,7 +391,9 @@ async function puxar_fretes(array_ids) {
       //   throw { status: "8932" };
       // }
       console.log(
-        `Frete: Loop ${i}: ${resposta_x.data.coverage.all_country.list_cost}`
+        `Frete: Loop ${i}: ${
+          resposta_x.data.coverage.all_country.list_cost
+        } ${JSON.stringify(resposta_x.data)}`
       );
       array_jsons_frete_apelado.push({
         id: array_ids[i],
@@ -438,51 +415,6 @@ async function puxar_fretes(array_ids) {
 }
 // puxar_fretes(["MLB3883535212"]);
 
-// const {
-//   ids,
-//   titulos,
-//   catalog_product_ids,
-//   prices,
-//   permalinks,
-//   available_quantity,
-//   sold_quantity,
-//   date_created,
-//   last_updated,
-//   GTINS,
-//   SKUS,
-// } = {
-//   ids: result.data.map((lixo) => lixo.body.id),
-//   titulos: result.data.map((lixo) => lixo.body.title),
-//   catalog_product_ids: result.data.map(
-//     (lixo) => lixo.body.catalog_product_id
-//   ),
-//   prices: result.data.map((lixo) => lixo.body.price),
-//   permalinks: result.data.map((lixo) => lixo.body.permalink),
-//   available_quantity: result.data.map((lixo) => lixo.body.available_quantity),
-//   sold_quantity: result.data.map((lixo) => lixo.body.sold_quantity),
-//   date_created: result.data.map((lixo) => lixo.body.date_created),
-//   last_updated: result.data.map((lixo) => lixo.body.last_updated),
-//   GTINS: result.data.map(function (lixo) {
-//     for (i in lixo.body.attributes) {
-//       if (lixo.body.attributes[i].id == "GTIN") {
-//         return lixo.body.attributes[i].value_name;
-//       } else {
-//         // console.log("GTIN", i);
-//       }
-//     }
-//     return "999";
-//   }),
-//   SKUS: result.data.map(function (lixo) {
-//     for (i in lixo.body.attributes) {
-//       if (lixo.body.attributes[i].id == "SELLER_SKU") {
-//         return lixo.body.attributes[i].value_name;
-//       } else {
-//         // console.log("SKU", i);
-//       }
-//     }
-//     return "ERRO";
-//   }),
-
 async function pedidos_json(n) {
   console.log("começa pedidos_json");
   const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
@@ -500,10 +432,6 @@ async function pedidos_json(n) {
       },
       headers: `Authorization: Bearer ${fake_meli_token}`,
     });
-    // console.log(result.data.results);
-    // console.log(result.data.results.order_items);
-
-    //payments e order_items são listas, então tem q fazer um nested mapping
     const {
       id,
       paid_amount,
@@ -516,6 +444,7 @@ async function pedidos_json(n) {
       buyer_nickname,
       buyer_id,
       tags,
+      //payments e order_items são listas, então tem q fazer um nested mapping
       payments_order_id,
       payments_payer_id,
       payments_payment_type,
@@ -544,9 +473,6 @@ async function pedidos_json(n) {
       buyer_nickname: result.data.results.map((lixo) => lixo.buyer.nickname),
       buyer_id: result.data.results.map((lixo) => lixo.buyer.id),
       tags: result.data.results.map((lixo) => lixo.tags),
-      // payments_order_id: result.data.results.map(
-      //   (lixo) => lixo.payments[0].order_id
-      // ),
       payments_order_id: result.data.results.map((lixo) => {
         return lixo.payments.map((x) => x.order_id);
       }),
@@ -653,7 +579,6 @@ app.get("/pedidosupserttable", async (req, res) => {
       nome: "upsert",
     });
     console.log(`Pedidos: Upserção da Table Pedidos ${inserir}`);
-    // res.send(inserir);
     res.render("home", {
       url_api: `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}&limit=1&sort=date_desc&include_attributes=all`,
       resultado_api: `Table Pedidos atualizada com sucesso. ${inserir.rowCount} linhas foram atualizadas.`,
@@ -711,12 +636,9 @@ app.get("/atualizartablefretes", async (req, res) => {
       texto: `SELECT id FROM public.fretes ORDER BY data_atualizacao ASC, id DESC`,
       nome: "Frete: ids menor data_atualizacao",
     });
-    // res.send(menos_atualizados);
     // console.log(menos_atualizados.rows);
     const lista_menos_atualizados = menos_atualizados.rows.map(({ id }) => id);
-    // res.send(lista_menos_atualizados);
-
-    await puxar_fretes(lista_menos_atualizados); //os resultados são salvos numa variável global pq n sei se dá pra retornar error E o return da API
+    await puxar_fretes(lista_menos_atualizados); //os resultados são salvos na variável global ${array_jsons_frete_apelado} pq n sei se dá pra retornar error E o return da API
     res.send("Frete: rodou sem dar erro 429????");
   } catch (err) {
     console.log("Frete: qdo erra vem pra cá");
@@ -785,9 +707,9 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
     }
     product_ids_reversed = product_ids.sort().toReversed();
-    // loop de 20 em 20 de 0 ate 1167
-    // console.log(product_ids_reversed);
+
     for (let i = 0; i < Math.ceil(product_ids_reversed.length / 20); i++) {
+      // loop de 20 em 20 de 0 ate 1167
       console.log(`atributos ${i}`);
       const lixo = await atributos(
         product_ids_reversed.slice(i * 20, (i + 1) * 20) //end not included
@@ -801,6 +723,8 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
         permalink: lixo.permalinks[x],
         available_quantity: ~~lixo.available_quantity[x],
         sold_quantity: ~~lixo.sold_quantity[x],
+        status: lixo.status[x],
+        sub_status: lixo.sub_status[x],
         date_created: lixo.date_created[x],
         last_updated: lixo.last_updated[x],
         gtin: lixo.GTINS[x],
@@ -808,10 +732,6 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
         free_shipping: lixo.free_shipping[x],
         shipping_tags: lixo.shipping_tags[x],
       }));
-      // console.log(
-      //   "lixo_lista_jsons******************************************************************************************************",
-      //   lixo_lista_jsons
-      // );
       lixo_lista_jsons_agregado.push(...lixo_lista_jsons);
     }
     console.log(
@@ -829,13 +749,15 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
     // CREATE;
     const create = await minha_query({
       texto: `create table anuncios (
-              id VARCHAR(100),
+              id VARCHAR(100) primary key,
               titulo VARCHAR(200),
               catalog_product_id VARCHAR(100),
               price INT,
               permalink VARCHAR(200),
               available_quantity INT,
               sold_quantity INT,
+              status VARCHAR(50),
+              sub_status VARCHAR(50)[],
               date_created TIMESTAMPTZ,
               last_updated TIMESTAMPTZ,
               gtin VARCHAR(100),
@@ -847,12 +769,14 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       nome: "create",
     });
     console.log(`Create ${create}`);
-
+    const string_das_colunas =
+      "id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,status,sub_status,date_created,last_updated,gtin,sku,free_shipping,shipping_tags";
     // Insere
     const inserir = await minha_query({
       texto:
-        `INSERT INTO public.anuncios (id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku,free_shipping,shipping_tags)` +
-        "SELECT id,titulo,catalog_product_id,price,permalink,available_quantity,sold_quantity,date_created,last_updated,gtin,sku,free_shipping,shipping_tags FROM json_populate_recordset(null::anuncios, $1)",
+        `INSERT INTO public.anuncios (${string_das_colunas}) ` +
+        `SELECT ${string_das_colunas} ` +
+        "FROM json_populate_recordset(null::anuncios, $1)",
       params: [JSON.stringify(lixo_lista_jsons_agregado)],
       nome: "inserir",
     });
