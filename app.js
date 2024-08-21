@@ -365,17 +365,6 @@ async function minha_query({ texto, params, nome = "sem_nome", callback }) {
   }
 }
 
-// async function teste_query(array_ids) {
-//   resposta = await minha_query({
-//     texto: "SELECT id FROM public.anuncios WHERE id = ANY($1)",
-//     params: [array_ids],
-//     nome: "testa query",
-//   });
-//   console.log(resposta);
-//   return resposta;
-// }
-// teste_query(["MLB4945040624", "MLB4922063120"]);
-
 let array_jsons_frete_apelado = [];
 async function puxar_fretes(array_ids) {
   const resposta = [];
@@ -835,5 +824,16 @@ passport.serializeUser((user, callback) => {
 passport.deserializeUser((user, callback) => {
   callback(null, user);
 });
+
+// async function teste_query(array_ids) {
+//   resposta = await minha_query({
+//     texto: "SELECT id FROM public.anuncios WHERE id = ANY($1)",
+//     params: [array_ids],
+//     nome: "testa query",
+//   });
+//   console.log(resposta);
+//   return resposta;
+// }
+// teste_query(["MLB4945040624", "MLB4922063120"]);
 
 module.exports = app;
