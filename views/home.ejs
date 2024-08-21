@@ -57,6 +57,9 @@
     <button class="meli" onclick="window.location.href='/atualizartablefrete'">
       Atualiza Parcialmente a Table Fretes
     </button>
+    <button class="meli" onclick="window.location.href='/pedidosupserttable'">
+      Atualiza a Table Vendas
+    </button>
     <!-- <button class="meli" onclick="window.location.href='/anuncios20'">
       Atualiza Últimos 20 da Tabela de Anúncios
     </button> -->
@@ -82,11 +85,6 @@
       <button type="submit">Consultar Vendedor</button>
     </form>
     <hr />
-    <form action="/vendas" method="POST">
-      <label for="offset">Offset:</label>
-      <input type="offset" id="offsetasdf" name="offset" placeholder="0" />
-      <button type="submit">Consultar Vendas</button>
-    </form>
     <% if (locals.url_api) { %>
     <div class="question-area">
       <h2>URL da API:</h2>

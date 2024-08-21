@@ -1,5 +1,5 @@
 const fake_meli_token =
-  "APP_USR-4576000651843598-082015-37a44c3c4c83277abfb0ee49c13e728d-1375484326";
+  "APP_USR-4576000651843598-082020-7460da756bf882cf1cf1d2e2002362ed-1375484326";
 
 const express = require("express");
 const morgan = require("morgan");
@@ -268,13 +268,15 @@ async function atributos(ids_bla) {
     }),
   };
   // console.log(
-  // ids,
+  //   ids,
   //   titulos,
   //   catalog_product_ids,
   //   prices,
   //   permalinks,
-  // available_quantity
-  // sold_quantity,
+  //   available_quantity,
+  //   sold_quantity,
+  //   date_created,
+  //   last_updated,
   //   GTINS,
   //   SKUS
   // );
@@ -292,35 +294,6 @@ async function atributos(ids_bla) {
     SKUS,
   };
 }
-
-app.post("/vendas", async (req, res) => {
-  const { offset } = req.body;
-  const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
-  try {
-    console.log("tentei");
-    const result = await axios.get(url, {
-      params: {
-        offset: offset,
-        limit: "51",
-        sort: "date_desc",
-      },
-      headers: `Authorization: Bearer ${fake_meli_token}`,
-    });
-    res.render("home", {
-      url_api: url,
-      resultado_api: JSON.stringify(result.data),
-      code: MELI_CODE,
-      token: MELI_TOKEN,
-    });
-  } catch (error) {
-    res.render("home", {
-      url_api: url,
-      resultado_api: error,
-      code: "",
-      token: "",
-    });
-  }
-});
 
 app.post("/consultauser", async (req, res) => {
   if (req.isAuthenticated()) {
@@ -469,6 +442,234 @@ async function puxar_fretes(array_ids) {
   }
 }
 // puxar_fretes(["MLB3883535212"]);
+
+// const {
+//   ids,
+//   titulos,
+//   catalog_product_ids,
+//   prices,
+//   permalinks,
+//   available_quantity,
+//   sold_quantity,
+//   date_created,
+//   last_updated,
+//   GTINS,
+//   SKUS,
+// } = {
+//   ids: result.data.map((lixo) => lixo.body.id),
+//   titulos: result.data.map((lixo) => lixo.body.title),
+//   catalog_product_ids: result.data.map(
+//     (lixo) => lixo.body.catalog_product_id
+//   ),
+//   prices: result.data.map((lixo) => lixo.body.price),
+//   permalinks: result.data.map((lixo) => lixo.body.permalink),
+//   available_quantity: result.data.map((lixo) => lixo.body.available_quantity),
+//   sold_quantity: result.data.map((lixo) => lixo.body.sold_quantity),
+//   date_created: result.data.map((lixo) => lixo.body.date_created),
+//   last_updated: result.data.map((lixo) => lixo.body.last_updated),
+//   GTINS: result.data.map(function (lixo) {
+//     for (i in lixo.body.attributes) {
+//       if (lixo.body.attributes[i].id == "GTIN") {
+//         return lixo.body.attributes[i].value_name;
+//       } else {
+//         // console.log("GTIN", i);
+//       }
+//     }
+//     return "999";
+//   }),
+//   SKUS: result.data.map(function (lixo) {
+//     for (i in lixo.body.attributes) {
+//       if (lixo.body.attributes[i].id == "SELLER_SKU") {
+//         return lixo.body.attributes[i].value_name;
+//       } else {
+//         // console.log("SKU", i);
+//       }
+//     }
+//     return "ERRO";
+//   }),
+
+async function pedidos_json(n) {
+  console.log("começa pedidos_json");
+  const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
+  try {
+    const result = await axios.get(url, {
+      params: {
+        offset: n * 50,
+        limit: "50",
+        sort: "date_desc",
+        attributes:
+          "results.id,results.paid_amount,results.total_amount,results.shipping,results.shipping_cost,results.pack_id,results.date_created,results.date_last_updated," +
+          "results.buyer,results.tags," +
+          "results.payments.order_id,results.payments.payer_id,results.payments.payment_type,results.payments.installments,results.payments.date_approved,results.payments.shipping_cost," +
+          "results.order_items.sale_fee,results.order_items.item.id,results.order_items.item.title,results.order_items.item.seller_sku",
+      },
+      headers: `Authorization: Bearer ${fake_meli_token}`,
+    });
+    // console.log(result.data.results);
+    // console.log(result.data.results.order_items);
+
+    //payments e order_items são listas, então tem q fazer um nested mapping
+    const {
+      id,
+      paid_amount,
+      total_amount,
+      shipping_id,
+      shipping_cost,
+      pack_id,
+      date_created,
+      date_last_updated,
+      buyer_nickname,
+      buyer_id,
+      tags,
+      payments_order_id,
+      payments_payer_id,
+      payments_payment_type,
+      payments_installments,
+      payments_date_approved,
+      payments_shipping_cost,
+      order_items_sale_fee,
+      order_items_item_id,
+      order_items_item_title,
+      order_items_item_seller_sku,
+    } = {
+      id: result.data.results.map((lixo) => lixo.id),
+      paid_amount: result.data.results.map(
+        (lixo) => ~~(100 * lixo.paid_amount)
+      ),
+      total_amount: result.data.results.map(
+        (lixo) => ~~(100 * lixo.total_amount)
+      ),
+      shipping_id: result.data.results.map((lixo) => lixo.shipping.id),
+      shipping_cost: result.data.results.map((lixo) => lixo.shipping_cost),
+      pack_id: result.data.results.map((lixo) => lixo.pack_id),
+      date_created: result.data.results.map((lixo) => lixo.date_created),
+      date_last_updated: result.data.results.map(
+        (lixo) => lixo.date_last_updated
+      ),
+      buyer_nickname: result.data.results.map((lixo) => lixo.buyer.nickname),
+      buyer_id: result.data.results.map((lixo) => lixo.buyer.id),
+      tags: result.data.results.map((lixo) => lixo.tags),
+      // payments_order_id: result.data.results.map(
+      //   (lixo) => lixo.payments[0].order_id
+      // ),
+      payments_order_id: result.data.results.map((lixo) => {
+        return lixo.payments.map((x) => x.order_id);
+      }),
+      payments_payer_id: result.data.results.map((lixo) => {
+        return lixo.payments.map((x) => x.payer_id);
+      }),
+      payments_payment_type: result.data.results.map((lixo) => {
+        return lixo.payments.map((x) => x.payment_type);
+      }),
+      payments_installments: result.data.results.map((lixo) => {
+        return lixo.payments.map((x) => x.installments);
+      }),
+      payments_date_approved: result.data.results.map((lixo) => {
+        return lixo.payments.map((x) => x.date_approved);
+      }),
+      payments_shipping_cost: result.data.results.map((lixo) => {
+        return lixo.payments.map((x) => ~~(100 * x.shipping_cost));
+      }),
+      order_items_sale_fee: result.data.results.map((lixo) => {
+        return lixo.order_items.map((x) => ~~(100 * x.sale_fee));
+      }),
+      order_items_item_id: result.data.results.map((lixo) => {
+        return lixo.order_items.map((x) => x.item.id);
+      }),
+      order_items_item_title: result.data.results.map((lixo) => {
+        return lixo.order_items.map((x) => x.item.title);
+      }),
+      order_items_item_seller_sku: result.data.results.map((lixo) => {
+        return lixo.order_items.map((x) => x.item.seller_sku);
+      }),
+    };
+
+    //transformando os n arrays em 1 array de jsons
+    const array_jsons = id.map((id, x) => ({
+      id,
+      paid_amount: paid_amount[x],
+      total_amount: total_amount[x],
+      shipping_id: shipping_id[x],
+      shipping_cost: shipping_cost[x],
+      pack_id: pack_id[x],
+      date_created: date_created[x],
+      date_last_updated: date_last_updated[x],
+      buyer_nickname: buyer_nickname[x],
+      buyer_id: buyer_id[x],
+      tags: tags[x],
+      payments_order_id: payments_order_id[x],
+      payments_payer_id: payments_payer_id[x],
+      payments_shipping_cost: payments_shipping_cost[x],
+      payments_payment_type: payments_payment_type[x],
+      payments_installments: payments_installments[x],
+      payments_date_approved: payments_date_approved[x],
+      order_items_sale_fee: order_items_sale_fee[x],
+      order_items_item_id: order_items_item_id[x],
+      order_items_item_title: order_items_item_title[x],
+      order_items_item_seller_sku: order_items_item_seller_sku[x],
+    }));
+    console.log(array_jsons);
+    return array_jsons;
+  } catch (err) {
+    console.log("PEDIDOS_JSON ERRO CNSIcnbIENDAIdQJW");
+    throw err;
+  }
+}
+
+app.get("/pedidosupserttable", async (req, res) => {
+  console.log("começa pedidos");
+  try {
+    let array_jsons = [];
+    const url = `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}`;
+    const result = await axios.get(url, {
+      params: {
+        offset: 0,
+        limit: "1",
+        sort: "date_desc",
+      },
+      headers: `Authorization: Bearer ${fake_meli_token}`,
+    });
+    for (let i = 0; i < Math.ceil(result.data.paging.total / 50); i++) {
+      console.log(`Pedidos: Loop ${i}`);
+      const result_x = await pedidos_json(i);
+      array_jsons.push(...result_x);
+    }
+    const string_das_colunas =
+      "id,paid_amount,total_amount,shipping_id,shipping_cost,pack_id,date_created,date_last_updated,buyer_nickname,buyer_id,tags,payments_order_id,payments_payer_id,payments_shipping_cost,payments_payment_type,payments_installments,payments_date_approved,order_items_sale_fee,order_items_item_id,order_items_item_title,order_items_item_seller_sku";
+    const excluded_string_de_colunas = string_das_colunas
+      .split(",")
+      .slice(1) //Tirando id pq ele n é SETADO no CONFLICT
+      .map((x) => {
+        return `${x} = EXCLUDED.${x}`;
+      })
+      .join(",");
+    const texto_minha_query =
+      `INSERT INTO public.pedidos (${string_das_colunas}) ` +
+      `SELECT ${string_das_colunas} ` +
+      "FROM json_populate_recordset (null::pedidos, $1) " +
+      "ON CONFLICT (id) " +
+      "DO UPDATE SET " +
+      `${excluded_string_de_colunas}, ` +
+      "data_atualizacao=CURRENT_TIMESTAMP(0)-interval '3 hour'";
+    // console.log(texto_minha_query);
+    const inserir = await minha_query({
+      texto: texto_minha_query,
+      params: [JSON.stringify(array_jsons)],
+      nome: "upsert",
+    });
+    console.log(`Pedidos: Upserção da Table Pedidos ${inserir}`);
+    // res.send(inserir);
+    res.render("home", {
+      url_api: `https://api.mercadolibre.com/orders/search?seller=${SELLER_ID}&limit=1&sort=date_desc&include_attributes=all`,
+      resultado_api: `Table Pedidos atualizada com sucesso. ${inserir.rowCount} linhas foram atualizadas.`,
+      code: MELI_CODE,
+      token: MELI_TOKEN,
+    });
+  } catch (err) {
+    console.log("erro OJDAsoDJASIDSAJ", err);
+    res.send(err);
+  }
+});
 
 app.get("/atualizartablefrete", async (req, res) => {
   var scroll_id_x = [""];
