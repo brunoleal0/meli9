@@ -100,6 +100,7 @@ app.get("/getcode", async (req, res) => {
     try {
       res.redirect(MELI_URL_CODE);
     } catch (error) {
+      console.log(error, "GetCode: Error FINAL");
       res.render("home", { resultado_api: error });
     }
   } else {
@@ -142,6 +143,7 @@ app.get("/gettoken", async (req, res) => {
           });
         })
         .catch((error) => {
+          console.log(error, "GetToken: Error FINAL");
           res.render("home", {
             url_api: url,
             resultado_api: error,
@@ -172,6 +174,7 @@ app.get("/mmpublico", async (req, res) => {
         token: MELI_TOKEN,
       });
     } catch (error) {
+      console.log(error, "MMPublico: Error FINAL");
       res.render("home", {
         url_api: url,
         resultado_api: error,
@@ -198,6 +201,7 @@ app.get("/pessoais", async (req, res) => {
         token: MELI_TOKEN,
       });
     } catch (error) {
+      console.log(error, "Pessoais: Error FINAL");
       res.render("home", {
         url_api: url,
         resultado_api: error,
@@ -315,6 +319,7 @@ app.post("/consultauser", async (req, res) => {
         token: MELI_TOKEN,
       });
     } catch (error) {
+      console.log(error, "ConsultaUser: Error FINAL");
       res.render("home", {
         url_api: url,
         resultado_api: error,
@@ -340,6 +345,7 @@ app.post("/consultaseller", async (req, res) => {
         token: MELI_TOKEN,
       });
     } catch (error) {
+      console.log(error, "ConsultaSeller: Error FINAL");
       res.render("home", {
         url_api: url,
         resultado_api: error,
@@ -580,7 +586,7 @@ app.get("/pedidosupserttable", async (req, res) => {
       token: MELI_TOKEN,
     });
   } catch (err) {
-    console.log(err, "erro Pedidos OJDAsoDJASIDSAJ FINAL");
+    console.log(err, "Pedidos: Err FINAL");
     res.render("home", {
       url_api: `https://api.mercadolibre.com/items?ids=`,
       resultado_api: err,
@@ -676,7 +682,7 @@ app.get("/atualizartablefretes", async (req, res) => {
           token: MELI_TOKEN,
         });
       } catch (error2) {
-        console.log("Frete: Error2");
+        console.log(error2, "Frete: Error2 FINAL");
         res.render("home", {
           url_api: `https://api.mercadolibre.com/items?ids=`,
           resultado_api: error2,
@@ -685,7 +691,7 @@ app.get("/atualizartablefretes", async (req, res) => {
         });
       }
     } else {
-      console.log("Frete: Erro status:", err.response.data.status);
+      console.log(err, "Frete: Erro FINAL");
       res.render("home", {
         url_api: `https://api.mercadolibre.com/items?ids=`,
         resultado_api: err,
@@ -807,7 +813,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
       token: MELI_TOKEN,
     });
   } catch (error) {
-    console.log(error);
+    console.log(error, "Anúncios: Erro FINAL");
     res.render("home", {
       url_api: `https://api.mercadolibre.com/items?ids=`,
       resultado_api: error,
