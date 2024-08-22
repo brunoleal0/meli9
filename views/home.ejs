@@ -5,64 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meli9</title>
     <style>
+      body {
+        background-color: blanchedalmond;
+      }
+      .code_token {
+        width: 100px;
+        overflow-wrap: break-word;
+        display: inline-block;
+        background-color: aquamarine;
+      }
+      .code_token:hover {
+        width: 100px;
+        overflow-wrap: break-word;
+        display: inline-block;
+        background-color: greenyellow;
+      }
       .meli {
-        height: 200px;
-        width: 200px;
+        height: 50px;
+        /* height: 20em; */
+        width: 10em;
         background-color: yellow;
         overflow-wrap: break-word;
         white-space: normal;
-        display: inline-block;
-        border-radius: 0.2em;
+        display: block;
+        border-radius: 2em;
       }
-      .meli:hover {
+      /* .meli:hover {
         height: 200px;
         width: 200px;
         background-color: plum;
         overflow-wrap: break-word;
         white-space: normal;
         display: inline-block;
-        border-radius: 20px;
-      }
+        border-radius: 2em;
+      } */
     </style>
   </head>
   <body>
-    <div class="code-token-area">
-      <% if (locals.code) { %>
-      <h1>Code: <%=code%></h1>
-      <% } %>
-      <p></p>
-      <% if (locals.token) { %>
-      <h1>Token: <%=token%></h1>
+    <p></p>
+    <div>
+      <button class="code_token" onclick="window.location.href='/getcode'">
+        Gerar Code
+      </button>
+      Code: DAKSPdpAskdPAKads <% if (locals.code) { %>
+      <h2>Code: <%=code%></h2>
       <% } %>
     </div>
+    <p></p>
+    <div>
+      <button class="code_token" onclick="window.location.href='/gettoken'">
+        Gerar Token
+      </button>
+      Token: DAKSodsakfosdKFKFDS <% if (locals.token) { %>
+      <h2>Token: <%=token%></h2>
+      <% } %>
+    </div>
+    <p></p>
     <hr />
-    <button class="meli" onclick="window.location.href='/getcode'">
-      Gerar Code
-    </button>
-    <button class="meli" onclick="window.location.href='/gettoken'">
-      Gerar Token
-    </button>
-    <button class="meli" onclick="window.location.href='/mmpublico'">
-      MM - Dados Públicos
-    </button>
-    <button class="meli" onclick="window.location.href='/pessoais'">
-      Informações da Conta
-    </button>
-    <button
-      class="meli"
-      onclick="window.location.href='/anunciosdropcreateinserttable'"
-    >
-      Gera Table Anuncios
-    </button>
-    <button class="meli" onclick="window.location.href='/atualizartablefretes'">
-      Atualiza Parcialmente a Table Fretes
-    </button>
-    <button class="meli" onclick="window.location.href='/pedidosupserttable'">
-      Atualiza a Table Pedidos
-    </button>
-    <!-- <button class="meli" onclick="window.location.href='/anuncios20'">
-      Atualiza Últimos 20 da Tabela de Anúncios
-    </button> -->
+    <p></p>
+    <h2>Realizar API</h2>
+    <div>
+      <button class="meli" onclick="window.location.href='/mmpublico'">
+        MM - Dados Públicos
+      </button>
+      <button class="meli" onclick="window.location.href='/pessoais'">
+        Informações da Conta
+      </button>
+      <button
+        class="meli"
+        onclick="window.location.href='/anunciosdropcreateinserttable'"
+      >
+        Gera Table Anuncios
+      </button>
+      <button
+        class="meli"
+        onclick="window.location.href='/atualizartablefretes'"
+      >
+        Atualiza Parcialmente a Table Fretes
+      </button>
+      <button class="meli" onclick="window.location.href='/pedidosupserttable'">
+        Atualiza a Table Pedidos
+      </button>
+    </div>
     <hr />
     <form action="/consultauser" method="POST">
       <label for="user">ID/Nickname Usuário:</label>

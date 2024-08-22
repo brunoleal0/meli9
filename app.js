@@ -1,7 +1,8 @@
 console.log("heroku logs --app=meli9 --tail"); //pra ver os logs do heroku
+// nodemon ./bin/www
+
 const fake_meli_token =
   "APP_USR-4576000651843598-082113-7abe9053fa9580faf4d5e9771ca944b4-1375484326";
-
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
@@ -11,8 +12,6 @@ const session = require("express-session");
 const passport = require("passport");
 const { Strategy } = require("passport-local");
 const { Pool } = require("pg");
-// const { type } = require("os");
-// const { error } = require("console");
 const {
   CLIENT_ID,
   CLIENT_SECRET,
@@ -46,6 +45,7 @@ const app = express();
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static("public"));
 app.use(morgan("combined"));
 app.use(
   session({
@@ -64,11 +64,15 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+app.get("/error", (req, res) => {
+  res.render("error");
+});
+
 app.post(
   "/login",
   passport.authenticate("local", {
     successRedirect: "/home",
-    failureRedirect: "/",
+    failureRedirect: "/error",
   })
 );
 
