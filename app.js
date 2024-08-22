@@ -388,7 +388,7 @@ async function puxar_fretes(array_ids) {
         headers: `Authorization: Bearer ${fake_meli_token}`,
       });
       // if (i == 10) {
-      //   throw { status: "8932" };
+      //   throw 'erro';
       // }
       console.log(
         `Frete: Loop ${i}: ${
@@ -674,11 +674,10 @@ app.get("/atualizartablefretes", async (req, res) => {
         // console.log(ultima_data_atualizacao);
         res.render("home", {
           url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
-          resultado_api:
-            `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez. ` +
-            "Table fretes parcialmente atualizada. " +
-            `${ultima_data_atualizacao.rowCount} ids têm a mais antiga data de atualização: ${ultima_data_atualizacao.rows[0].data_atualizacao}.` +
-            ` Clicar novamente no botão para atualizar novamente a table`,
+          resultado_api_um: `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez.`,
+          resultado_api_dois: "Table fretes parcialmente atualizada.",
+          resultado_api_tres: `${ultima_data_atualizacao.rowCount} ids têm data de atualização mais antiga: ${ultima_data_atualizacao.rows[0].data_atualizacao}.`,
+          resultado_api_quatro: `Clicar novamente no botão para atualizar novamente a table.`,
           code: MELI_CODE,
           token: MELI_TOKEN,
         });
