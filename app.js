@@ -685,7 +685,7 @@ app.get("/atualizartablefretes", async (req, res) => {
         const ultima_data_atualizacao = await minha_query({
           texto:
             "SELECT id, data_atualizacao FROM public.fretes WHERE data_atualizacao IN" +
-            "(SELECT data_atualizacao FROM public.fretes GROUP BY data_atualizacao LIMIT 1)",
+            "(SELECT data_atualizacao FROM public.fretes GROUP BY data_atualizacao ORDER BY data_atualizacao ASC LIMIT 1)",
           nome: "Frete: Puxar ultima data_atualizacao",
         });
         console.log(ultima_data_atualizacao.rows[0].data_atualizacao);
