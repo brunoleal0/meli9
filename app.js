@@ -2,7 +2,7 @@ console.log("heroku logs --app=meli9 --tail"); //pra ver os logs do heroku
 // nodemon ./bin/www
 
 const fake_meli_token =
-  "APP_USR-4576000651843598-082113-7abe9053fa9580faf4d5e9771ca944b4-1375484326";
+  "APP_USR-4576000651843598-082215-edc45049c83168fe13b88a6bd26e5f16-1375484326";
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
