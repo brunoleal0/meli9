@@ -85,24 +85,24 @@
     </div>
     <hr />
     <form action="/consultauser" method="POST">
-      <label for="user">ID/Nickname Usuário:</label>
+      <label for="user">Consultar um Usuário (ID ou Nickname):</label>
       <input
         type="user"
         id="consultauser"
         name="user"
         placeholder="1375484326 ou mais+modelismo"
       />
-      <button type="submit">Consultar Usuário</button>
+      <button type="submit">Consultar</button>
     </form>
     <form action="/consultaseller" method="POST">
-      <label for="seller">ID do Vendedor:</label>
+      <label for="seller">Consultar um Vendedor (ID)</label>
       <input
         type="seller"
         id="consultaseller"
         name="seller"
         placeholder="670550295"
       />
-      <button type="submit">Consultar Vendedor</button>
+      <button type="submit">Consultar</button>
     </form>
     <hr />
     <% if (locals.url_api) { %>
