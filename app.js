@@ -580,8 +580,13 @@ app.get("/pedidosupserttable", async (req, res) => {
       token: MELI_TOKEN,
     });
   } catch (err) {
-    console.log("erro OJDAsoDJASIDSAJ", err);
-    res.send(err);
+    console.log(err, "erro Pedidos OJDAsoDJASIDSAJ FINAL");
+    res.render("home", {
+      url_api: `https://api.mercadolibre.com/items?ids=`,
+      resultado_api: err,
+      code: "",
+      token: "",
+    });
   }
 });
 
@@ -672,11 +677,21 @@ app.get("/atualizartablefretes", async (req, res) => {
         });
       } catch (error2) {
         console.log("Frete: Error2");
-        res.send(error2);
+        res.render("home", {
+          url_api: `https://api.mercadolibre.com/items?ids=`,
+          resultado_api: error2,
+          code: "",
+          token: "",
+        });
       }
     } else {
       console.log("Frete: Erro status:", err.response.data.status);
-      res.send(err);
+      res.render("home", {
+        url_api: `https://api.mercadolibre.com/items?ids=`,
+        resultado_api: err,
+        code: "",
+        token: "",
+      });
     }
   }
 });
