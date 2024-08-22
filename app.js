@@ -596,6 +596,23 @@ app.get("/pedidosupserttable", async (req, res) => {
   }
 });
 
+// async function uhul() {
+//   const ultima_data_atualizacao = await minha_query({
+//     texto:
+//       "SELECT id, data_atualizacao FROM public.fretes WHERE data_atualizacao IN" +
+//       "(SELECT data_atualizacao FROM public.fretes GROUP BY data_atualizacao LIMIT 1)",
+//     nome: "Frete: Puxar ultima data_atualizacao",
+//   });
+//   console.log(
+//     ultima_data_atualizacao.rows[0].data_atualizacao,
+//     typeof ultima_data_atualizacao.rows[0].data_atualizacao
+//   );
+//   console.log(
+//     ultima_data_atualizacao.rows[0].data_atualizacao.toLocaleString()
+//   );
+// }
+// uhul();
+
 app.get("/atualizartablefretes", async (req, res) => {
   var scroll_id_x = [""];
   var product_ids = [];
@@ -671,12 +688,14 @@ app.get("/atualizartablefretes", async (req, res) => {
             "(SELECT data_atualizacao FROM public.fretes GROUP BY data_atualizacao LIMIT 1)",
           nome: "Frete: Puxar ultima data_atualizacao",
         });
-        console.log(ultima_data_atualizacao);
+        console.log(ultima_data_atualizacao.rows[0].data_atualizacao);
         res.render("home", {
           url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
-          resultado_api_um: `A API de fretes do Mercado Livre só permite atualizar por volta de 300 IDs por vez.`,
+          resultado_api_um: `A API de Fretes do Mercado Livre só permite atualizar por volta de 500 IDs por vez.`,
           resultado_api_dois: "Table fretes parcialmente atualizada.",
-          resultado_api_tres: `${ultima_data_atualizacao.rowCount} ids têm data de atualização mais antiga: ${ultima_data_atualizacao.rows[0].data_atualizacao}.`,
+          resultado_api_tres: `${
+            ultima_data_atualizacao.rowCount
+          } ids têm data de atualização mais antiga: ${ultima_data_atualizacao.rows[0].data_atualizacao.toLocaleString()}.`,
           resultado_api_quatro: `Clicar novamente no botão para atualizar novamente a table.`,
           code: MELI_CODE,
           token: MELI_TOKEN,
