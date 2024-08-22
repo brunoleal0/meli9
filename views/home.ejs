@@ -47,18 +47,14 @@
       <button class="code_token" onclick="window.location.href='/getcode'">
         Gerar Code
       </button>
-      Code: DAKSPdpAskdPAKads <% if (locals.code) { %>
-      <h2>Code: <%=code%></h2>
-      <% } %>
+      <% if (locals.code) { %> Code: <%=code%> <% } %>
     </div>
     <p></p>
     <div>
       <button class="code_token" onclick="window.location.href='/gettoken'">
         Gerar Token
       </button>
-      Token: DAKSodsakfosdKFKFDS <% if (locals.token) { %>
-      <h2>Token: <%=token%></h2>
-      <% } %>
+      <% if (locals.token) { %> Token: <%=token%> <% } %>
     </div>
     <p></p>
     <hr />
