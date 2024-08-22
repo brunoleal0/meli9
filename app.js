@@ -600,6 +600,7 @@ app.get("/atualizartablefretes", async (req, res) => {
   var scroll_id_x = [""];
   var product_ids = [];
   const url1 = `https://api.mercadolibre.com/users/${SELLER_ID}/items/search`;
+  array_jsons_frete_apelado = [];
   try {
     const result = await axios.get(url1, {
       headers: `Authorization: Bearer ${fake_meli_token}`,
@@ -671,6 +672,7 @@ app.get("/atualizartablefretes", async (req, res) => {
             "(SELECT data_atualizacao FROM public.fretes GROUP BY data_atualizacao LIMIT 1)",
           nome: "Frete: Puxar ultima data_atualizacao",
         });
+        console.log(ultima_data_atualizacao);
         res.render("home", {
           url_api: `https://api.mercadolibre.com/users/${SELLER_ID}/shipping_options/free?item_id=`,
           resultado_api:
