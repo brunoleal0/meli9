@@ -838,7 +838,7 @@ passport.use(
         return callback(null, false);
       }
     } catch (error) {
-      console.log("dasdas", error);
+      console.log(error, "Passport: Error");
     }
   })
 );
