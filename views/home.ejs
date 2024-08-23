@@ -6,44 +6,80 @@
     <title>Meli9</title>
     <style>
       body {
-        background-color: blanchedalmond;
+        background-color: #f5c293;
+      }
+      button {
+        cursor: pointer;
+      }
+      label {
+        width: 2000px;
       }
       .code_token {
-        width: 100px;
-        overflow-wrap: break-word;
-        display: inline-block;
-        background-color: aquamarine;
+        /* background-image: linear-gradient(-180deg, #37aee2 0%, #1e96c8 100%); */
+        background-color: #3483fa;
+        color: #ffffff;
+        border-radius: 1rem;
+        box-sizing: border-box;
+        font-size: 16px;
+        justify-content: center;
+        text-decoration: none;
+        width: 150px;
+        height: 3em;
+        border: 0;
       }
       .code_token:hover {
-        width: 100px;
-        overflow-wrap: break-word;
-        display: inline-block;
-        background-color: greenyellow;
+        /* background-image: linear-gradient(-18deg, #1d95c9 0%, #17759c 100%); */
+        color: black;
       }
+
       .meli {
-        height: 50px;
-        /* height: 20em; */
-        width: 10em;
-        background-color: yellow;
+        width: 150px;
+        height: 75px;
+        background-color: #ffe600;
         overflow-wrap: break-word;
         white-space: normal;
-        display: block;
-        border-radius: 2em;
+        border-radius: 1em;
+        align-items: center;
+        justify-content: center;
+        font-family: -apple-system, system-ui, "Segoe UI", Helvetica, Arial,
+          sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        font-size: 15px;
+        font-weight: 500;
+        border: 0;
       }
-      /* .meli:hover {
-        height: 200px;
-        width: 200px;
-        background-color: plum;
+      .meli:hover {
+        color: rgba(41, 40, 40, 0.377);
+      }
+
+      .dropdown {
+        position: relative;
+        width: 62px;
+      }
+      /* Show the dropdown menu on hover */
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+      .dropdown-content {
+        /* display: none; */
+        display: block;
+        position: relative;
+        width: 100vw;
+        /* background-color: #f9f9f9; */
+        min-width: 160px;
+        /* box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); */
+        z-index: 1;
+      }
+      .response-area {
+        /* background-color: #f3d2b4; */
+        background-color: #ffe3c8;
         overflow-wrap: break-word;
-        white-space: normal;
-        display: inline-block;
-        border-radius: 2em;
-      } */
+      }
     </style>
   </head>
   <body>
     <p></p>
     <div>
+      <h2>Gerar Code/Token</h2>
       <button class="code_token" onclick="window.location.href='/getcode'">
         Gerar Code
       </button>
@@ -60,69 +96,77 @@
     <hr />
     <p></p>
     <h2>Realizar API</h2>
-    <div>
-      <button class="meli" onclick="window.location.href='/mmpublico'">
-        MM - Dados Públicos
-      </button>
+    <div class="dropdown-content">
       <button class="meli" onclick="window.location.href='/pessoais'">
         Informações da Conta
+      </button>
+      <button class="meli" onclick="window.location.href='/mmpublico'">
+        MM - Dados Públicos
       </button>
       <button
         class="meli"
         onclick="window.location.href='/anunciosdropcreateinserttable'"
       >
-        Gera Table Anuncios
+        Atualiza a Table Anuncios
       </button>
       <button
         class="meli"
         onclick="window.location.href='/atualizartablefretes'"
       >
-        Atualiza Parcialmente a Table Fretes
+        Atualiza a Table Fretes
       </button>
       <button class="meli" onclick="window.location.href='/pedidosupserttable'">
         Atualiza a Table Pedidos
       </button>
     </div>
     <hr />
-    <form action="/consultauser" method="POST">
-      <label for="user">Consultar um Usuário (ID ou Nickname):</label>
-      <input
-        type="user"
-        id="consultauser"
-        name="user"
-        placeholder="1375484326 ou mais+modelismo"
-      />
-      <button type="submit">Consultar</button>
-    </form>
-    <form action="/consultaseller" method="POST">
-      <label for="seller">Consultar um Vendedor (ID)</label>
-      <input
-        type="seller"
-        id="consultaseller"
-        name="seller"
-        placeholder="670550295"
-      />
-      <button type="submit">Consultar</button>
-    </form>
+    <div class="form-area">
+      <h2>Formulários</h2>
+      <form action="/consultauser" method="POST">
+        <label for="user">Consultar um Usuário (ID ou Nickname):</label>
+        <input
+          type="user"
+          id="consultauser"
+          name="user"
+          placeholder="1375484326 ou mais+modelismo"
+        />
+        <button type="submit">Consultar</button>
+      </form>
+      <p></p>
+      <form action="/consultaseller" method="POST">
+        <label for="seller">Consultar um Vendedor (ID):</label>
+        <input
+          type="seller"
+          id="consultaseller"
+          name="seller"
+          placeholder="670550295"
+        />
+        <button type="submit">Consultar</button>
+      </form>
+    </div>
     <hr />
     <% if (locals.url_api) { %>
-    <div class="question-area">
+    <div>
       <h2>URL da API:</h2>
       <p><%=url_api%></p>
     </div>
     <% } %>
     <p></p>
     <% if (locals.resultado_api) { %>
-    <div class="response-area">
+    <div>
       <h2>Resultado da API:</h2>
-      <p><%=resultado_api%></p>
+      <div class="response-area">
+        <p><%=resultado_api%></p>
+      </div>
     </div>
     <% } %> <% if (locals.resultado_api_um) { %>
-    <div class="response-area">
+    <div>
       <h2>Resultado da API:</h2>
-      <p><%=resultado_api_um%> <%=resultado_api_dois%></p>
-      <p><%=resultado_api_tres%></p>
-      <p><%=resultado_api_quatro%></p>
+      <div class="response-area">
+        <p><%=resultado_api_um%> <%=resultado_api_dois%></p>
+        <p><%=resultado_api_tres%></p>
+        <p><%=resultado_api_quatro%></p>
+      </div>
     </div>
     <% } %>
   </body>
