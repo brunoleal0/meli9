@@ -1,8 +1,8 @@
 console.log("heroku logs --app=meli9 --tail"); //pra ver os logs do heroku
 // nodemon ./bin/www
 
-const fake_meli_token =
-  "APP_USR-4576000651843598-082215-edc45049c83168fe13b88a6bd26e5f16-1375484326";
+// const fake_meli_token =
+//   "APP_USR-4576000651843598-082215-edc45049c83168fe13b88a6bd26e5f16-1375484326";
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
@@ -224,7 +224,7 @@ async function atributos(ids_bla) {
       include_attributes: "all",
       // include_internal_attributes: true,
     },
-    headers: `Authorization: Bearer ${fake_meli_token}`,
+    headers: `Authorization: Bearer ${MELI_TOKEN}`,
   });
   // https://stackoverflow.com/questions/49413544/destructuring-array-of-objects-in-es6
   // https://stackoverflow.com/questions/66330228/how-to-destructure-an-array-of-objects-into-multiple-arrays-of-its-keys
@@ -385,7 +385,7 @@ async function puxar_fretes(array_ids) {
         params: {
           item_id: array_ids[i],
         },
-        headers: `Authorization: Bearer ${fake_meli_token}`,
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
       });
       // if (i == 10) {
       //   throw 'erro';
@@ -430,7 +430,7 @@ async function pedidos_json(n) {
           "results.payments.order_id,results.payments.payer_id,results.payments.payment_type,results.payments.installments,results.payments.date_approved,results.payments.shipping_cost," +
           "results.order_items.sale_fee,results.order_items.item.id,results.order_items.item.title,results.order_items.item.seller_sku",
       },
-      headers: `Authorization: Bearer ${fake_meli_token}`,
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     const {
       id,
@@ -548,7 +548,7 @@ app.get("/pedidosupserttable", async (req, res) => {
         limit: "1",
         sort: "date_desc",
       },
-      headers: `Authorization: Bearer ${fake_meli_token}`,
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     for (let i = 0; i < Math.ceil(result.data.paging.total / 50); i++) {
       console.log(`Pedidos: Loop ${i}`);
@@ -603,7 +603,7 @@ app.get("/atualizartablefretes", async (req, res) => {
   array_jsons_frete_apelado = []; //atribuindo o valor como vazio pra "reiniciar" a variável qdo o usuário rodar mais de 1x na mesma sessão
   try {
     const result = await axios.get(url1, {
-      headers: `Authorization: Bearer ${fake_meli_token}`,
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
       console.log(`Anúncios: Loop ${i}`);
@@ -613,7 +613,7 @@ app.get("/atualizartablefretes", async (req, res) => {
           limit: "100",
           scroll_id: scroll_id_x[i], //na prática é como se puxasse de i-1 pq scroll_id_x[0] ja eh iniciado com o valor "" antes da primeira iteracao
         },
-        headers: `Authorization: Bearer ${fake_meli_token}`,
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
       });
       scroll_id_x.push(result_x.data.scroll_id);
       product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
@@ -710,7 +710,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
   let lixo_lista_jsons_agregado = [];
   try {
     const result = await axios.get(url, {
-      headers: `Authorization: Bearer ${fake_meli_token}`,
+      headers: `Authorization: Bearer ${MELI_TOKEN}`,
     });
     for (let i = 0; i < Math.ceil(result.data.paging.total / 100); i++) {
       console.log(`Anúncios: Loop ${i}`);
@@ -720,7 +720,7 @@ app.get("/anunciosdropcreateinserttable", async (req, res) => {
           limit: "100",
           scroll_id: scroll_id_x[i], //na prática é como se puxasse de i-1 pq scroll_id_x[0] ja eh iniciado com o valor "" antes da primeira iteracao
         },
-        headers: `Authorization: Bearer ${fake_meli_token}`,
+        headers: `Authorization: Bearer ${MELI_TOKEN}`,
       });
       scroll_id_x.push(result_x.data.scroll_id);
       product_ids.push(...result_x.data.results); //https://stackoverflow.com/questions/1374126/how-to-extend-an-existing-javascript-array-with-another-array-without-creating
