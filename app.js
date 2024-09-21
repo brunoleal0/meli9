@@ -2,7 +2,7 @@ console.log("heroku logs --app=meli9 --tail"); //pra ver os logs do heroku
 // nodemon ./bin/www
 
 // const fake_meli_token =
-//   "APP_USR-4576000651843598-082215-edc45049c83168fe13b88a6bd26e5f16-1375484326";
+//   "APP_USR-4576000651843598-0921-1375484326";
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
@@ -428,9 +428,10 @@ async function pedidos_json(n) {
           "results.id,results.paid_amount,results.total_amount,results.shipping,results.shipping_cost,results.pack_id,results.date_created,results.date_last_updated," +
           "results.buyer,results.tags," +
           "results.payments.order_id,results.payments.payer_id,results.payments.payment_type,results.payments.installments,results.payments.date_approved,results.payments.shipping_cost," +
-          "results.order_items.sale_fee,results.order_items.item.id,results.order_items.item.title,results.order_items.item.seller_sku",
+          "results.order_items.sale_fee,results.order_items.item.id,results.order_items.item.title,results.order_items.item.seller_sku,results.order_items.quantity",
       },
       headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      // headers: `Authorization: Bearer ${fake_meli_token}`,
     });
     const {
       id,
@@ -455,6 +456,7 @@ async function pedidos_json(n) {
       order_items_item_id,
       order_items_item_title,
       order_items_item_seller_sku,
+      order_items_quantity,
     } = {
       id: result.data.results.map((lixo) => lixo.id),
       paid_amount: result.data.results.map(
@@ -503,6 +505,9 @@ async function pedidos_json(n) {
       order_items_item_seller_sku: result.data.results.map((lixo) => {
         return lixo.order_items.map((x) => x.item.seller_sku);
       }),
+      order_items_quantity: result.data.results.map((lixo) => {
+        return lixo.order_items.map((x) => x.quantity);
+      }),
     };
 
     //transformando os n arrays em 1 array de jsons
@@ -528,6 +533,7 @@ async function pedidos_json(n) {
       order_items_item_id: order_items_item_id[x],
       order_items_item_title: order_items_item_title[x],
       order_items_item_seller_sku: order_items_item_seller_sku[x],
+      order_items_quantity: order_items_quantity[x],
     }));
     console.log(array_jsons);
     return array_jsons;
@@ -549,6 +555,7 @@ app.get("/pedidosupserttable", async (req, res) => {
         sort: "date_desc",
       },
       headers: `Authorization: Bearer ${MELI_TOKEN}`,
+      // headers: `Authorization: Bearer ${fake_meli_token}`,
     });
     for (let i = 0; i < Math.ceil(result.data.paging.total / 50); i++) {
       console.log(`Pedidos: Loop ${i}`);
@@ -556,7 +563,7 @@ app.get("/pedidosupserttable", async (req, res) => {
       array_jsons.push(...result_x);
     }
     const string_das_colunas =
-      "id,paid_amount,total_amount,shipping_id,shipping_cost,pack_id,date_created,date_last_updated,buyer_nickname,buyer_id,tags,payments_order_id,payments_payer_id,payments_shipping_cost,payments_payment_type,payments_installments,payments_date_approved,order_items_sale_fee,order_items_item_id,order_items_item_title,order_items_item_seller_sku";
+      "id,paid_amount,total_amount,shipping_id,shipping_cost,pack_id,date_created,date_last_updated,buyer_nickname,buyer_id,tags,payments_order_id,payments_payer_id,payments_shipping_cost,payments_payment_type,payments_installments,payments_date_approved,order_items_sale_fee,order_items_item_id,order_items_item_title,order_items_item_seller_sku,order_items_quantity";
     const excluded_string_de_colunas = string_das_colunas
       .split(",")
       .slice(1) //Tirando id pq ele n é SETADO no CONFLICT
